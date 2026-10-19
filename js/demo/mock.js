@@ -31,7 +31,6 @@ const ROSTER = [
   // قسم العلوم
   [P.t1, 'ghazwa', 'الأستاذة غزوة العتيبي', 'teacher', true, 'العلوم'],
   [P.haya, 'haya', 'الأستاذة هيا الشهراني', 'committee', true, 'العلوم'],
-  [P.nawha, 'nawha', 'الأستاذة نوهة الزهراني', 'teacher', true, 'العلوم'],
   [P.asha, 'asha', 'الأستاذة عاشة الشهراني', 'teacher', true, 'العلوم'],
   // قسم التربية الأسرية
   [P.munira, 'munira', 'الأستاذة منيرة الشهراني', 'teacher', true, null],
@@ -44,7 +43,7 @@ const ROSTER = [
   [P.hayaali, 'hayaali', 'الأستاذة هيا علي الشهراني', 'teacher', true, 'الدراسات الإسلامية'],
   [P.sarahashmi, 'sarahashmi', 'الأستاذة سارة الهاشمي', 'teacher', true, 'الدراسات الإسلامية'],
   // قسم الرياضيات
-  [P.najwa, 'najwa', 'الأستاذة نجوى معشي', 'teacher', true, null],
+  [P.najwa, 'najwa', 'الأستاذة نجوى آل معشي', 'teacher', true, null],
   [P.noura, 'noura', 'الأستاذة نورة الشهراني', 'teacher', true, null],
   [P.muzna, 'muzna', 'الأستاذة مزنة الشهراني', 'teacher', true, null],
   // قسم اللغة الإنجليزية
@@ -156,7 +155,7 @@ function seed() {
 // ---------------------------------------------------------------------
 //  الحالة
 // ---------------------------------------------------------------------
-const KEY = 'tahseel-demo-db-v10';
+const KEY = 'tahseel-demo-db-v11';
 const store = {
   get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
   set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) { /* ignore */ } },
