@@ -24,7 +24,7 @@ export default async function teachers(view) {
 
   view.innerHTML = `
     ${pageHead('المعلمات ومتابعة الإنجاز', 'حسابات الدخول، المواد والصفوف، ونسبة إنجاز كل معلمة.', `
-      ${App.isAdmin ? `<button class="btn primary" data-add>${icon('user-plus')} إضافة معلمة</button>` : ''}
+      ${App.isAdmin ? `<button class="btn primary" data-add>${icon('user-plus')} إضافة معلمة</button> <button class="btn" data-bulk>${icon('users')} إنشاء حسابات جماعية</button>` : ''}
       <button class="btn" data-xls>${icon('file-spreadsheet')} تصدير Excel</button>`)}
     <div class="card">
       <div class="filters" style="margin-bottom:12px">
@@ -72,6 +72,10 @@ export default async function teachers(view) {
     const k = th.dataset.sort; sortDir = sortKey === k && sortDir === 'asc' ? 'desc' : 'asc'; sortKey = k; paint();
   }));
   view.querySelector('[data-add]')?.addEventListener('click', () => accountDialog(null, asg));
+  view.querySelector('[data-bulk]')?.addEventListener('click', async () => {
+    const { bulkAccountsDialog } = await import('./bulk-accounts.js');
+    bulkAccountsDialog(people.map((p) => p.username));
+  });
   view.querySelector('[data-xls]').addEventListener('click', async (e) => {
     await withBusy(e.currentTarget, async () => {
       const XLSX = await getXLSX();
