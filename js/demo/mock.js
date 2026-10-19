@@ -44,7 +44,7 @@ const ROSTER = [
   [P.hayaali, 'hayaali', 'الأستاذة هيا علي الشهراني', 'teacher', true, 'الدراسات الإسلامية'],
   [P.sarahashmi, 'sarahashmi', 'الأستاذة سارة الهاشمي', 'teacher', true, 'الدراسات الإسلامية'],
   // قسم الرياضيات
-  [P.najwa, 'najwa', 'الأستاذة نجوى مهشي', 'teacher', true, null],
+  [P.najwa, 'najwa', 'الأستاذة نجوى معشي', 'teacher', true, null],
   [P.noura, 'noura', 'الأستاذة نورة الشهراني', 'teacher', true, null],
   [P.muzna, 'muzna', 'الأستاذة مزنة الشهراني', 'teacher', true, null],
   // قسم اللغة الإنجليزية
