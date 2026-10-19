@@ -1,6 +1,7 @@
 // نقطة البداية: التحقق من الدخول، رسم الإطار العام، والتنقل بين الصفحات
 import { sb, App, configured, loadContext, loadPublicSettings, logout, refreshUnread, DEMO } from './api.js';
 import { esc, icon, refreshIcons, toast, ROLES, initials, $ } from './ui.js';
+import { ensureNafes, loadNafesFlag } from './nafes.js';
 
 const app = document.getElementById('app');
 
@@ -204,6 +205,7 @@ export async function boot() {
   if (!configured) return notConfigured();
   try {
     const profile = await loadContext();
+    if (profile) { await ensureNafes(); await loadNafesFlag().catch(() => {}); }
     if (!profile) {
       const user = App.user;
       if (user) {

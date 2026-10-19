@@ -5,6 +5,7 @@ import { pageHead, Chart } from './_common.js';
 import { REPORT_KINDS } from './reports.js';
 import { getXLSX } from '../extract.js';
 import { comparePeriods } from '../stats.js';
+import { NAFES_KEY, NAFES_REQS, nafesSubjectIds } from '../nafes.js';
 
 const pct = (a, b) => (b ? Math.round((1000 * a) / b) / 10 : 0);
 
@@ -143,6 +144,63 @@ async function build(kind, filters, people) {
     if (issues.length) C.lists.push({ title: 'تنبيهات على اكتمال البيانات واتساقها', items: issues.slice(0, 40) });
     const noStats = list.filter((f) => !withStats.includes(f));
     if (noStats.length) C.notes.push(`${noStats.length} ملف لم تُحسب له إحصاءات (ليس كشف Excel/CSV أو تعذر قراءته)؛ لم يدخل في الأرقام أعلاه.`);
+    C.sources = src(list);
+  }
+  else if (kind === 'nafes') {
+    const list = files.filter((f) => f.category_key === NAFES_KEY);
+    const an = await anFor(list);
+    const nreqs = reqs.filter((r) => r.category_key === NAFES_KEY);
+    const sids = nafesSubjectIds();
+    const asg = (await q.assignments()).filter((a) => sids.includes(a.subject_id));
+    const tids = [...new Set(nreqs.map((r) => r.teacher_id))];
+    const subjOf = (t) => [...new Set(asg.filter((a) => a.teacher_id === t).map((a) => subjectName(a.subject_id)))].join('، ');
+    const fileSubj = (f) => subjectName(f.subject_id) || subjOf(f.teacher_id) || '—';
+    const sub = nreqs.filter((r) => r.state !== 'missing').length, comp = nreqs.filter((r) => r.state === 'complete').length;
+    const withStats = list.filter((f) => an[f.id]?.stats?.kind === 'grades' && an[f.id].stats.ok);
+    C.facts.push({ label: 'معلمات نافس (العلوم، الرياضيات، اللغة العربية)', value: fmtNum(tids.length) },
+      { label: 'متطلبات نافس المرفوعة', value: `${fmtNum(sub)} من ${fmtNum(nreqs.length)} (${fmtPct(pct(sub, nreqs.length))})` },
+      { label: 'المعتمد منها', value: `${fmtNum(comp)} (${fmtPct(pct(comp, nreqs.length))})` },
+      { label: 'ملفات قسم نافس', value: fmtNum(list.length) },
+      { label: 'كشوف اختبارات تجريبية محسوبة', value: fmtNum(withStats.length) });
+    // جاهزية كل معلمة
+    const st = (t, title) => { const r = nreqs.find((x) => x.teacher_id === t && x.title === title); return r ? (REQ_STATE[r.state]?.label || r.state) : '—'; };
+    C.tables.push({ title: 'جاهزية المعلمات لنافس', columns: ['المعلمة', 'المادة', ...NAFES_REQS.map((r) => r.title), 'نسبة الرفع ٪'],
+      rows: tids.map((t) => { const mine = nreqs.filter((r) => r.teacher_id === t); return [names[t] || mine[0]?.full_name || '', subjOf(t) || '—', ...NAFES_REQS.map((r) => st(t, r.title)), pct(mine.filter((r) => r.state !== 'missing').length, mine.length)]; }) });
+    // حسب المادة
+    const subjects = [...new Set(asg.map((a) => subjectName(a.subject_id)))];
+    const bySubj = subjects.map((s) => {
+      const ts = [...new Set(asg.filter((a) => subjectName(a.subject_id) === s).map((a) => a.teacher_id))].filter((t) => tids.includes(t));
+      const rr = nreqs.filter((r) => ts.includes(r.teacher_id));
+      const sf = withStats.filter((f) => fileSubj(f).includes(s));
+      const means = sf.map((f) => { const x = an[f.id].stats; return x.columns.find((c) => c.label === x.main_column)?.mean_pct; }).filter((v) => typeof v === 'number');
+      return [s, ts.length, pct(rr.filter((r) => r.state !== 'missing').length, rr.length), sf.length, means.length ? Math.round(10 * means.reduce((a, b) => a + b, 0) / means.length) / 10 : '—'];
+    });
+    if (bySubj.length) C.tables.push({ title: 'نافس حسب المادة', columns: ['المادة', 'عدد المعلمات', 'نسبة رفع المتطلبات ٪', 'كشوف تجريبية محسوبة', 'متوسط الأداء في الكشوف ٪'], rows: bySubj });
+    if (bySubj.length) C.charts.push({ title: 'نسبة رفع متطلبات نافس حسب المادة', type: 'bar', labels: bySubj.map((r) => r[0]), datasets: [{ label: 'نسبة الرفع ٪', data: bySubj.map((r) => r[2]) }], max: 100 });
+    // نتائج الاختبارات التجريبية
+    if (withStats.length) {
+      C.tables.push({ title: 'نتائج الاختبارات التجريبية (محسوبة من الكشوف الأصلية)', columns: ['المعلمة', 'المادة', 'الملف', 'عدد الطالبات', 'المتوسط ٪', 'النجاح ٪'],
+        rows: withStats.map((f) => { const s = an[f.id].stats; const m = s.columns.find((c) => c.label === s.main_column) || {}; return [names[f.teacher_id] || '', fileSubj(f), f.name, s.students, m.mean_pct ?? '—', m.pass_rate ?? '—']; }) });
+      const skills = withStats.flatMap((f) => (an[f.id].stats.skills || []).map((k) => ({ ...k, f })));
+      const lbl = { mastered: 'متقنة', partial: 'إتقان جزئي', needs_intervention: 'تحتاج تدخلاً علاجياً', unknown: 'لا يمكن الحكم' };
+      if (skills.length) {
+        C.facts.push({ label: 'مهارات مقاسة في الاختبارات التجريبية', value: fmtNum(skills.length) }, { label: 'مهارات تحتاج تدخلاً علاجياً', value: fmtNum(skills.filter((k) => k.status === 'needs_intervention').length) });
+        const sorted = [...skills].sort((a, b) => (a.mastery_rate ?? 999) - (b.mastery_rate ?? 999));
+        C.tables.push({ title: 'المهارات مرتبة من الأضعف إلى الأقوى', columns: ['المادة', 'المهارة', 'المعلمة', 'عدد الطالبات', 'نسبة من أتقنّ ٪', 'التصنيف'],
+          rows: sorted.map((k) => [fileSubj(k.f), k.skill, names[k.f.teacher_id] || '', k.n, k.mastery_rate ?? '—', lbl[k.status]]) });
+        const weak = sorted.filter((k) => typeof k.mastery_rate === 'number').slice(0, 15);
+        if (weak.length) C.charts.push({ title: 'أضعف المهارات (نسبة الإتقان ٪)', type: 'bar', horizontal: true, labels: weak.map((k) => `${fileSubj(k.f)} — ${k.skill}`.slice(0, 60)), datasets: [{ label: 'الإتقان ٪', data: weak.map((k) => k.mastery_rate) }], max: 100 });
+        subjects.forEach((s) => { const w = skills.filter((k) => fileSubj(k.f).includes(s) && k.status === 'needs_intervention').map((k) => k.skill);
+          if (w.length) C.lists.push({ title: `مهارات ${s} التي تحتاج تدخلاً علاجياً قبل نافس`, items: [...new Set(w)].slice(0, 25) }); });
+      }
+      const groups = {}; withStats.forEach((f) => (groups[`${f.teacher_id}|${fileSubj(f)}`] ||= []).push(f));
+      const cmp = [];
+      Object.values(groups).filter((g) => g.length > 1).forEach((g) => { g.sort((a, b) => a.created_at.localeCompare(b.created_at)); for (let i = 1; i < g.length; i++) { const c = comparePeriods(an[g[i - 1].id].stats, an[g[i].id].stats); if (c.comparable) cmp.push([names[g[i].teacher_id] || '', fileSubj(g[i]), `${g[i - 1].name} ← ${g[i].name}`, c.mean_pct_a, c.mean_pct_b, c.diff_mean_pct]); } });
+      if (cmp.length) C.tables.push({ title: 'تطور الأداء بين الاختبارات التجريبية', columns: ['المعلمة', 'المادة', 'الاختباران', 'المتوسط السابق ٪', 'المتوسط اللاحق ٪', 'الفرق'], rows: cmp });
+      else C.notes.push('لا يوجد اختباران تجريبيان محللان لنفس المعلمة والمادة؛ لذا لا يتضمن التقرير حكماً على التحسن.');
+    } else C.notes.push('لم تُرفع كشوف اختبارات تجريبية بصيغة Excel أو CSV بعد. ارفعي الكشف بعمود لكل مهارة ليُحسب الإتقان لكل مهارة تلقائياً.');
+    const ext = list.filter((f) => !withStats.includes(f)).flatMap((f) => (an[f.id]?.extracted?.sections || []).filter((s) => /ضعف|اضعف|أضعف|مجال|توصي/.test(s.title)).flatMap((s) => s.items.map((i) => `${names[f.teacher_id] || ''} (${fileSubj(f)}): ${i}`)));
+    if (ext.length) C.lists.push({ title: 'ما استُخرج من تقارير نافس والخطط المرفوعة', items: ext.slice(0, 40), extracted: true });
     C.sources = src(list);
   }
   else if (kind === 'satisfaction') {

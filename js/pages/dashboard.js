@@ -2,6 +2,7 @@
 import { App, q, catOf, teacherNameMap } from '../api.js';
 import { esc, icon, fmtNum, fmtPct, timeAgo, statusChip, reqChip, fileIcon, emptyState, progressBar, pctClass, todayISO } from '../ui.js';
 import { letterhead, kpi, catIcon, folderLink, Chart, cssVar } from './_common.js';
+import { showCategory } from '../nafes.js';
 
 export default async function dashboard(view) {
   const [stats, files, analyses] = await Promise.all([q.stats(), q.files({ limit: 8 }), q.latestAnalyses(6)]);
@@ -76,7 +77,7 @@ export default async function dashboard(view) {
 }
 
 function folderCards(byCat = []) {
-  return App.categories.filter((c) => App.isStaff || c.per_teacher).map((c, i) => {
+  return App.categories.filter((c) => (App.isStaff || c.per_teacher) && showCategory(c)).map((c, i) => {
     const s = byCat.find((x) => x.key === c.key) || {};
     const p = s.required ? Math.round((100 * s.submitted) / s.required) : null;
     return `<a class="card folder-card" href="${App.isStaff || !c.per_teacher ? folderLink(c.key, null) : folderLink(c.key, App.user.id)}">

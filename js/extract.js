@@ -70,7 +70,7 @@ export async function sheetToHtml(buf, ext) {
 }
 
 // هل يحتاج الملف خيارات تحليل الدرجات؟
-export const needsGradeOptions = (category, ext) => ['period_tests', 'diagnostic'].includes(category) && ['xlsx', 'xls', 'csv'].includes(ext);
+export const needsGradeOptions = (category, ext) => ['period_tests', 'diagnostic', 'nafes'].includes(category) && ['xlsx', 'xls', 'csv'].includes(ext);
 
 // استخراج كامل قبل إرسال الملف للتحليل الذكي
 // opts: خيارات الدرجات { maxScore, maxPerColumn, passPct, masteryPct }
@@ -84,7 +84,7 @@ export async function prepareForAnalysis(file, category, opts = {}) {
       const s = await extractSpreadsheet(await file.arrayBuffer(), ext);
       out.text = s.text;
       if (category === 'period_tests') out.stats = analyzeGradeSheet(s.rows, { ...opts, mode: 'period' });
-      else if (category === 'diagnostic') out.stats = analyzeGradeSheet(s.rows, { ...opts, mode: 'diagnostic' });
+      else if (category === 'diagnostic' || category === 'nafes') out.stats = analyzeGradeSheet(s.rows, { ...opts, mode: 'diagnostic' });
       else if (category === 'satisfaction') out.stats = analyzeSurvey(s.rows);
       if (out.stats) out.stats.sheet = s.sheetName;
     }

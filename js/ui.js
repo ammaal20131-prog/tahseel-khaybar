@@ -31,7 +31,7 @@ export const ROLES = { principal: 'مديرة المدرسة', chair: 'رئيس�
 
 export const CAT_ICONS = {
   remedial: 'heart-pulse', satisfaction: 'smile', weekly: 'calendar-days', semester: 'book-open',
-  period_tests: 'chart-column', diagnostic: 'stethoscope', learning_styles: 'lightbulb', committee: 'archive',
+  period_tests: 'chart-column', diagnostic: 'stethoscope', learning_styles: 'lightbulb', committee: 'archive', nafes: 'target',
 };
 
 const AR_NUM = new Intl.NumberFormat('ar-SA-u-nu-latn');

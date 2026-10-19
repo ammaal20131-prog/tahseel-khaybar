@@ -4,6 +4,7 @@ import { esc, icon, fmtNum, fmtPct, fmtSize, timeAgo, statusChip, reqChip, fileI
 import { pageHead, catIcon, folderLink } from './_common.js';
 import { openUploadDialog, analyzeMany } from '../upload.js';
 import { rerender } from '../main.js';
+import { NAFES_KEY, NAFES_SECTIONS, nafesSubjectIds } from '../nafes.js';
 
 export default async function folder(view, params, query) {
   const cat = catOf(params.cat);
@@ -24,7 +25,9 @@ async function teacherList(view, cat) {
   const [prog, reqs, files] = await Promise.all([q.progress(), q.reqStatus(), q.files({ category: cat.key })]);
   const byT = {};
   files.forEach((f) => { (byT[f.teacher_id] ||= []).push(f); });
-  const rows = prog.filter((t) => t.active).map((t) => {
+  // نافس: معلمات العلوم والرياضيات واللغة العربية فقط (من لديهن متطلبات نافس أو ملفات فيه)
+  const nafesOnly = cat.key === NAFES_KEY;
+  const rows = prog.filter((t) => t.active && (!nafesOnly || reqs.some((x) => x.teacher_id === t.teacher_id && x.category_key === cat.key) || files.some((f) => f.teacher_id === t.teacher_id))).map((t) => {
     const r = reqs.filter((x) => x.teacher_id === t.teacher_id && x.category_key === cat.key);
     const submitted = r.filter((x) => x.state !== 'missing').length;
     const fs = byT[t.teacher_id] || [];
@@ -71,7 +74,18 @@ async function makeSubjectFolders(catKey, teacherIds) {
   const asg = await q.assignments();
   let n = 0;
   const periods = catKey === 'period_tests' ? ['الفترة الأولى', 'الفترة الثانية'] : [];
+  const nafes = catKey === NAFES_KEY, nsids = nafesSubjectIds();
   for (const tid of teacherIds) {
+    if (nafes) {
+      for (const sid of [...new Set(asg.filter((x) => x.teacher_id === tid && nsids.includes(x.subject_id)).map((x) => x.subject_id))]) {
+        const sn = subjectName(sid);
+        for (const p of [sn, ...NAFES_SECTIONS.map((x) => `${sn}/${x}`)]) {
+          const { error } = await sb.from('folders').insert({ category_key: catKey, teacher_id: tid, path: p, created_by: App.user.id });
+          if (!error) n++;
+        }
+      }
+      continue;
+    }
     for (const a of asg.filter((x) => x.teacher_id === tid)) {
       const base = `${subjectName(a.subject_id)}/${gradeName(a.grade_id)}`;
       const paths = [subjectName(a.subject_id), base, ...periods.map((p) => `${base}/${p}`)];

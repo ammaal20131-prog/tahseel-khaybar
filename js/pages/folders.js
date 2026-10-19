@@ -3,10 +3,11 @@ import { App, q } from '../api.js';
 import { esc, icon, fmtNum, fmtPct, progressBar, pctClass } from '../ui.js';
 import { pageHead, catIcon, folderLink } from './_common.js';
 import { oneDriveUrl } from './teachers.js';
+import { showCategory } from '../nafes.js';
 
 export default async function folders(view) {
   const stats = await q.stats();
-  const cats = App.categories.filter((c) => App.isStaff || c.per_teacher);
+  const cats = App.categories.filter((c) => (App.isStaff || c.per_teacher) && showCategory(c));
   view.innerHTML = `
     ${pageHead('المجلدات', App.isStaff ? 'نظام مجلدات منظم لكل متطلبات اللجنة: افتحي أي مجلد لاستعراض مجلدات المعلمات وملفاتها.' : 'مجلداتك الخاصة؛ لا يطّلع عليها إلا أنتِ واللجنة والإدارة.',
       oneDriveUrl(App.profile.onedrive_url) ? `<a class="btn" href="${esc(oneDriveUrl(App.profile.onedrive_url))}" target="_blank" rel="noopener">${icon('cloud')} مجلدي في OneDrive</a>` : '')}

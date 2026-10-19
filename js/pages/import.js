@@ -16,6 +16,7 @@ const CAT_KEYWORDS = {
   period_tests: ['فتره', 'فترة', 'الفترات', 'period'],
   diagnostic: ['تشخيص', 'diagnos'],
   learning_styles: ['انماط', 'أنماط', 'نمط', 'learning style'],
+  nafes: ['نافس', 'nafes', 'الاختبارات الوطنيه'],
   committee: ['شواهد', 'عامه', 'محاضر', 'اجتماع', 'تقارير اللجنه', 'committee'],
 };
 function matchCategory(name) {
