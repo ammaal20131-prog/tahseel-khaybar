@@ -4,7 +4,8 @@ import { esc, icon, fmtNum, fmtPct, fmtSize, timeAgo, statusChip, reqChip, fileI
 import { pageHead, catIcon, folderLink } from './_common.js';
 import { openUploadDialog, analyzeMany } from '../upload.js';
 import { rerender } from '../main.js';
-import { NAFES_KEY, NAFES_SECTIONS, nafesSubjectIds } from '../nafes.js';
+import { NAFES_KEY, NAFES_SECTIONS, nafesSubjectIds, setNafesTeachers } from '../nafes.js';
+import { modal } from '../ui.js';
 
 export default async function folder(view, params, query) {
   const cat = catOf(params.cat);
@@ -36,6 +37,7 @@ async function teacherList(view, cat) {
   });
   view.innerHTML = `
     ${pageHead(`${icon(catIcon(cat.key))} ${esc(cat.title)}`, esc(cat.description || ''), `
+      ${nafesOnly && App.isAdmin ? `<button class="btn primary" data-nafes>${icon('users')} تحديد معلمات نافس</button>` : ''}
       <button class="btn" data-mk>${icon('folder-plus')} إنشاء مجلدات المعلمات الفرعية</button>`,
       `<a href="#/folders">المجلدات</a> ${icon('chevron-left')} <span>${esc(cat.title)}</span>`)}
     <div class="card">
@@ -60,6 +62,19 @@ async function teacherList(view, cat) {
   };
   view.querySelector('[data-f]').addEventListener('input', paint);
   view.querySelector('[data-st]').addEventListener('change', paint);
+  view.querySelector('[data-nafes]')?.addEventListener('click', async () => {
+    const people = (await q.teachers()).filter((p) => p.active && p.is_teacher);
+    const cur = new Set(rows.map((r) => r.teacher_id));
+    const m = modal({ title: 'معلمات نافس المستهدفات', body: `<p class="muted" style="font-size:.85rem">حددي معلمات الثالث المتوسط المشمولات بنافس. تُضاف لكل معلمة محددة متطلبات نافس الأربعة، ومن تُزال علامتها تُوقف متطلباتها مع بقاء ملفاتها محفوظة.</p>
+      <div style="display:grid;gap:6px;max-height:360px;overflow:auto">${people.map((p) => `<label class="check"><input type="checkbox" value="${p.id}" ${cur.has(p.id) ? 'checked' : ''}> ${esc(p.full_name)}</label>`).join('')}</div>`,
+      footer: `<button class="btn primary" data-save>${icon('save')} حفظ</button><button class="btn ghost" data-close>إلغاء</button>` });
+    m.$('[data-save]').addEventListener('click', async (e) => {
+      await withBusy(e.currentTarget, async () => {
+        try { await setNafesTeachers(m.$$('input:checked').map((c) => c.value)); toast('تم تحديث معلمات نافس', 'ok'); m.close(); rerender(); }
+        catch (ex) { toast(errMsg(ex), 'bad', 7000); }
+      });
+    });
+  });
   view.querySelector('[data-mk]').addEventListener('click', async (e) => {
     await withBusy(e.currentTarget, async () => {
       const n = await makeSubjectFolders(cat.key, rows.map((r) => r.teacher_id));
