@@ -10,7 +10,8 @@ export default async function folders(view) {
   const cats = App.categories.filter((c) => (App.isStaff || c.per_teacher) && showCategory(c));
   view.innerHTML = `
     ${pageHead('المجلدات', App.isStaff ? 'نظام مجلدات منظم لكل متطلبات اللجنة: افتحي أي مجلد لاستعراض مجلدات المعلمات وملفاتها.' : 'مجلداتك الخاصة؛ لا يطّلع عليها إلا أنتِ واللجنة والإدارة.',
-      oneDriveUrl(App.profile.onedrive_url) ? `<a class="btn" href="${esc(oneDriveUrl(App.profile.onedrive_url))}" target="_blank" rel="noopener">${icon('cloud')} مجلدي في OneDrive</a>` : '')}
+      (App.isStaff ? `<button class="btn primary" data-od-export>${icon('cloud-download')} تصدير بترتيب OneDrive</button> ` : '') +
+      (oneDriveUrl(App.profile.onedrive_url) ? `<a class="btn" href="${esc(oneDriveUrl(App.profile.onedrive_url))}" target="_blank" rel="noopener">${icon('cloud')} مجلدي في OneDrive</a>` : ''))}
     <div class="grid auto">
       ${cats.map((c, i) => {
         const s = (stats.by_category || []).find((x) => x.key === c.key) || {};
@@ -28,4 +29,5 @@ export default async function folders(view) {
         </a>`;
       }).join('')}
     </div>`;
+  view.querySelector('[data-od-export]')?.addEventListener('click', async () => (await import('../onedrive-export.js')).openOneDriveExport());
 }
