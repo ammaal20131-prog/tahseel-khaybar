@@ -1,0 +1,437 @@
+// =====================================================================
+//  وظيفة الذكاء الاصطناعي — قراءة الملفات وتحليلها، المساعد الذكي، صياغة التقارير
+//  تعمل على خادم Supabase، ومفتاح Claude محفوظ كسر (Secret) ولا يظهر في الواجهة أبداً.
+// =====================================================================
+import { createClient } from 'npm:@supabase/supabase-js@2';
+import { encodeBase64 } from 'jsr:@std/encoding@1/base64';
+
+const URL = Deno.env.get('SUPABASE_URL')!;
+const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
+const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const API_KEY = Deno.env.get('ANTHROPIC_API_KEY') ?? '';
+const MODEL = Deno.env.get('ANTHROPIC_MODEL') ?? 'claude-sonnet-5-5';
+const MAX_AI_BYTES = 20 * 1024 * 1024; // حد إرسال الملف للتحليل
+
+const cors = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
+const fail = (message: string, status = 400) => json({ error: message }, status);
+
+const DOC_TYPES: Record<string, string> = {
+  remedial_plan: 'خطة علاجية',
+  enrichment_plan: 'خطة إثرائية',
+  weekly_plan: 'خطة أسبوعية',
+  semester_plan: 'خطة فصلية',
+  period_test_analysis: 'تحليل نتائج اختبارات الفترة',
+  diagnostic_analysis: 'تحليل نتائج الاختبار التشخيصي',
+  parent_satisfaction: 'قياس رضا أولياء الأمور',
+  learning_styles: 'أنماط التعلم',
+  committee_document: 'وثيقة عامة للجنة',
+  nafes_results: 'تحليل نتائج نافس',
+  nafes_trial_test: 'نتائج اختبار تجريبي محاكٍ لنافس',
+  nafes_plan: 'خطة علاجية لنافس',
+  nafes_evidence: 'شواهد تهيئة وتدريب لنافس',
+  unknown: 'غير معروف النوع — يحتاج إلى مراجعة',
+};
+const CATEGORY_TYPES: Record<string, string[]> = {
+  remedial: ['remedial_plan', 'enrichment_plan'],
+  satisfaction: ['parent_satisfaction'],
+  weekly: ['weekly_plan'],
+  semester: ['semester_plan'],
+  period_tests: ['period_test_analysis'],
+  diagnostic: ['diagnostic_analysis', 'remedial_plan'],
+  learning_styles: ['learning_styles'],
+  committee: ['committee_document'],
+  nafes: ['nafes_results', 'nafes_trial_test', 'nafes_plan', 'nafes_evidence', 'remedial_plan', 'diagnostic_analysis'],
+};
+const CATEGORY_FOCUS: Record<string, string> = {
+  remedial: 'استخرجي: الأهداف، الإجراءات والأنشطة، الفئات المستهدفة، مظاهر الضعف أو التفوق وأسبابها، فترات المتابعة، مؤشرات قياس الأثر، أدوات قياس التحسن، شواهد التنفيذ.',
+  satisfaction: 'استخرجي: أبرز جوانب الرضا، جوانب التحسين، تصنيف الملاحظات، التوصيات القابلة للتنفيذ، الإجراءات التحسينية المتخذة. اعتمدي فقط على الأرقام المحسوبة المرفقة وعدد الاستجابات.',
+  weekly: 'استخرجي متى توفرت: اسم المعلمة، المادة، الصف، الأسبوع الدراسي، موضوعات الدروس، الأهداف التعليمية، الواجبات والأنشطة، أساليب التقويم، المهارات المستهدفة.',
+  semester: 'استخرجي: توزيع المنهج، الأهداف التعليمية، المهارات الأساسية، الجدول الزمني للتنفيذ، أدوات التقويم، مؤشرات الإنجاز، تقارير المتابعة.',
+  period_tests: 'استخرجي: المهارات المرتفعة، المهارات التي تحتاج إلى تحسين، التوصيات العلاجية والإثرائية. الإحصاءات (المتوسط ونسب النجاح والإتقان والتوزيع) محسوبة مسبقاً من البيانات الأصلية: استخدميها كما هي ولا تحسبي أرقاماً جديدة، ولا تستنتجي تحسناً أو تراجعاً دون بيانات مقارنة.',
+  diagnostic: 'استخرجي: المهارات المتقنة، المهارات غير المتقنة، جوانب الضعف المشتركة، المهارات التي تحتاج تدخلاً علاجياً، الفئات المستهدفة، التوصيات لكل مهارة، مؤشرات المتابعة لقياس التحسن لاحقاً. استخدمي الإحصاءات المرفقة كما هي.',
+  learning_styles: 'استخرجي: الاستراتيجيات، الأنشطة المتنوعة، ربطها بالأهداف والمهارات، أساليب تنويع المحتوى والتقويم، مراعاة الفروق الفردية. قدّمي أنماط التعلم بوصفها وسيلة لتنويع التدريس، لا تصنيفاً ثابتاً للطالبة.',
+  nafes: 'الوثيقة تخص الاختبارات الوطنية (نافس) في العلوم أو الرياضيات أو القراءة/اللغة العربية. استخرجي: المادة، نتائج المدرسة ومقارنتها بالمتوسطات إن وُجدت، المجالات والمهارات الأضعف والأقوى، الفئات المستهدفة، الإجراءات العلاجية والتدريبية، الجدول الزمني، مؤشرات التحسن. استخدمي الإحصاءات المرفقة كما هي ولا تستنتجي تحسناً دون بيانات مقارنة.',
+  committee: 'حددي نوع الوثيقة (محضر اجتماع، خطة عمل، تقرير دوري، مبادرة، شاهد، توصيات، تقرير ختامي)، واستخرجي التاريخ والقرارات والتوصيات والمسؤوليات.',
+};
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+  if (req.method !== 'POST') return fail('طريقة غير مدعومة', 405);
+  let body: any;
+  try { body = await req.json(); } catch { return fail('طلب غير صالح'); }
+
+  const auth = req.headers.get('Authorization') ?? '';
+  const userDb = createClient(URL, ANON, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
+  const svc = createClient(URL, SERVICE, { auth: { persistSession: false } });
+  const { data: u } = await userDb.auth.getUser();
+  if (!u?.user) return fail('يلزم تسجيل الدخول', 401);
+  const { data: me } = await svc.from('profiles').select('id, role, active, full_name').eq('id', u.user.id).maybeSingle();
+  if (!me?.active) return fail('الحساب غير مفعل', 403);
+
+  const { data: settings } = await svc.from('settings').select('*').eq('id', 1).single();
+
+  if (body.action === 'config') {
+    return json({ ai_ready: !!API_KEY && !!settings?.ai_enabled, has_key: !!API_KEY, ai_enabled: !!settings?.ai_enabled, model: MODEL });
+  }
+  try {
+    // التحليل يعمل حتى بدون مفتاح: يحفظ النص والإحصاءات المحسوبة ويحوّل الملف للمراجعة البشرية
+    if (body.action === 'analyze') return await analyze(body, userDb, svc, settings, me);
+    if (!API_KEY) return fail('لم يُضف مفتاح Claude API بعد. أضيفيه من إعدادات Supabase ← Edge Functions ← Secrets باسم ANTHROPIC_API_KEY', 503);
+    if (!settings?.ai_enabled) return fail('التحليل الذكي موقوف من إعدادات الموقع', 503);
+    if (body.action === 'assistant') return await assistant(body, userDb, me);
+    if (body.action === 'narrative') return await narrative(body, me);
+    return fail('عملية غير معروفة');
+  } catch (e) {
+    console.error(e);
+    return fail('حدث خطأ: ' + (e as Error).message, 500);
+  }
+});
+
+// ---------------------------------------------------------------------
+//  استدعاء Claude
+// ---------------------------------------------------------------------
+async function claude(payload: Record<string, unknown>) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+    body: JSON.stringify({ model: MODEL, ...payload }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = data?.error?.message ?? res.statusText;
+    if (res.status === 401) throw new Error('مفتاح Claude API غير صحيح');
+    if (res.status === 429) throw new Error('تم تجاوز حد الاستخدام مؤقتاً، أعيدي المحاولة بعد دقيقة');
+    if (/pages|too large|exceed/i.test(msg)) throw new Error('الملف أكبر من الحد المسموح للقراءة (حتى 100 صفحة): ' + msg);
+    throw new Error('خدمة الذكاء الاصطناعي: ' + msg);
+  }
+  return data;
+}
+function toolInput(data: any, name: string) {
+  const b = (data?.content ?? []).find((c: any) => c.type === 'tool_use' && c.name === name);
+  if (!b) throw new Error('لم يُرجع الذكاء الاصطناعي نتيجة منظمة');
+  return b.input;
+}
+
+const ANALYSIS_TOOL = {
+  name: 'record_analysis',
+  description: 'تسجيل نتيجة قراءة الوثيقة المدرسية وتحليلها بشكل منظم',
+  input_schema: {
+    type: 'object',
+    properties: {
+      doc_type: { type: 'string', enum: Object.keys(DOC_TYPES) },
+      confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
+      extracted: {
+        type: 'object',
+        description: 'القيم كما وردت في الملف. اكتبي null لأي معلومة غير موجودة صراحة، ولا تخمني.',
+        properties: {
+          teacher_name: { type: ['string', 'null'] }, subject: { type: ['string', 'null'] },
+          grade: { type: ['string', 'null'] }, semester: { type: ['string', 'null'] },
+          academic_year: { type: ['string', 'null'] }, date: { type: ['string', 'null'] },
+          week: { type: ['string', 'null'] }, title: { type: ['string', 'null'] },
+        },
+        required: ['teacher_name', 'subject', 'grade', 'semester', 'academic_year', 'date', 'week', 'title'],
+      },
+      elements: {
+        type: 'array', description: 'مقارنة الملف بقائمة العناصر المطلوبة، عنصراً عنصراً',
+        items: {
+          type: 'object',
+          properties: {
+            item: { type: 'string' },
+            status: { type: 'string', enum: ['present', 'missing', 'review'] },
+            note: { type: 'string', description: 'دليل مختصر من الملف أو سبب الحكم' },
+          },
+          required: ['item', 'status', 'note'],
+        },
+      },
+      sections: {
+        type: 'array', description: 'المعلومات المستخرجة منظمة في أقسام (الأهداف، الإجراءات، الفئات المستهدفة، ...)',
+        items: {
+          type: 'object',
+          properties: { title: { type: 'string' }, items: { type: 'array', items: { type: 'string' } } },
+          required: ['title', 'items'],
+        },
+      },
+      summary: { type: 'string', description: 'ملخص واضح من 3 إلى 6 جمل' },
+      quality_notes: { type: 'array', items: { type: 'string' } },
+      recommendations: { type: 'array', items: { type: 'string' }, description: 'توصيات تحسين مقترحة (اقتراحات وليست بيانات)' },
+      unknown_fields: { type: 'array', items: { type: 'string' }, description: 'المعلومات التي تعذر تحديدها وتحتاج مراجعة' },
+      searchable_text: { type: 'string', description: 'نص المحتوى الرئيسي للوثيقة كما ورد (حتى 6000 حرف) لاستخدامه في البحث' },
+    },
+    required: ['doc_type', 'confidence', 'extracted', 'elements', 'sections', 'summary', 'quality_notes', 'recommendations', 'unknown_fields', 'searchable_text'],
+  },
+};
+
+// ---------------------------------------------------------------------
+//  1) قراءة ملف وتحليله
+// ---------------------------------------------------------------------
+async function analyze(body: any, userDb: any, svc: any, settings: any, me: any) {
+  const fileId = String(body.file_id ?? '');
+  // القراءة عبر صلاحيات المستخدمة: إن لم تكن تملك الملف فلن يظهر
+  const { data: file } = await userDb.from('files').select('*').eq('id', fileId).maybeSingle();
+  if (!file) return fail('الملف غير موجود أو ليس لديك صلاحية عليه', 404);
+
+  const { data: cat } = await svc.from('categories').select('*').eq('key', file.category_key).single();
+  let checklist: string[] = [];
+  if (file.requirement_id) {
+    const { data: r } = await svc.from('requirements').select('title, checklist').eq('id', file.requirement_id).maybeSingle();
+    checklist = (r?.checklist ?? []) as string[];
+  }
+  if (!checklist.length) {
+    const { data: rs } = await svc.from('requirements').select('checklist').eq('category_key', file.category_key).eq('active', true).order('sort').limit(1);
+    checklist = (rs?.[0]?.checklist ?? []) as string[];
+  }
+
+  // الملف المعتمد أو المعاد للاستكمال يحتفظ بقرار المراجعة؛ يُحدَّث التحليل فقط
+  const keepStatus = ['approved', 'needs_completion'].includes(file.status);
+  if (!keepStatus) await svc.from('files').update({ status: 'processing', status_reason: null }).eq('id', fileId);
+
+  const ext = String(file.ext || file.name.split('.').pop() || '').toLowerCase();
+  const clientText: string | undefined = typeof body.text === 'string' ? body.text.slice(0, 120000) : undefined;
+  const stats = body.stats ?? null; // محسوبة في المتصفح من البيانات الأصلية (بلا أسماء)
+  const content: any[] = [];
+  let method = '';
+
+  const recordFailure = async (reason: string, status: 'failed' | 'needs_review' = 'failed') => {
+    await svc.from('file_analyses').update({ is_latest: false }).eq('file_id', fileId);
+    await svc.from('file_analyses').insert({ file_id: fileId, method, model: method === 'local' ? null : MODEL, error: reason, stats, extracted_text: clientText ?? null });
+    if (!keepStatus) await svc.from('files').update({ status, status_reason: reason }).eq('id', fileId);
+    return json({ ok: false, status, reason });
+  };
+
+  const studentData = !!cat?.student_data;
+  const allowStudentFiles = !!settings.ai_send_student_files;
+
+  if (!API_KEY || !settings.ai_enabled) {
+    method = 'local';
+    return await recordFailure(
+      (!API_KEY ? 'التحليل الذكي غير مفعل (لم يُضف مفتاح Claude API)' : 'التحليل الذكي موقوف من إعدادات الموقع') +
+      (stats ? ' — تم حساب الإحصاءات من البيانات الأصلية، والملف بانتظار المراجعة البشرية' : ' — الملف بانتظار المراجعة البشرية'),
+      'needs_review');
+  }
+
+  if (['pdf', 'jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+    if (studentData && !allowStudentFiles) {
+      method = ext === 'pdf' ? 'pdf' : 'image';
+      return await recordFailure('حفاظاً على خصوصية بيانات الطالبات لم يُرسل هذا الملف للتحليل الذكي (الإعداد موقوف من لوحة الإدارة). ارفعي الكشف بصيغة Excel أو CSV ليُحلَّل داخل المتصفح دون إرسال الأسماء، أو اطلبي من الإدارة تفعيل الإعداد.', 'needs_review');
+    }
+    if (file.size_bytes > MAX_AI_BYTES) {
+      return await recordFailure('حجم الملف أكبر من 20 ميجابايت؛ لا يمكن قراءته بالذكاء الاصطناعي. قسّميه أو اضغطيه ثم أعيدي الرفع.');
+    }
+    const { data: blob, error } = await svc.storage.from('files').download(file.storage_path);
+    if (error || !blob) return await recordFailure('تعذر تنزيل الملف من التخزين: ' + (error?.message ?? ''));
+    const b64 = encodeBase64(new Uint8Array(await blob.arrayBuffer()));
+    if (ext === 'pdf') {
+      method = 'pdf-vision';
+      content.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } });
+    } else {
+      method = 'ocr-image';
+      const mt = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+      content.push({ type: 'image', source: { type: 'base64', media_type: mt, data: b64 } });
+    }
+  } else if (['docx', 'txt'].includes(ext)) {
+    method = 'docx';
+    if (!clientText) return await recordFailure('تعذر استخراج نص المستند. احفظيه بصيغة PDF وأعيدي الرفع.');
+    content.push({ type: 'text', text: 'نص المستند المستخرج:\n' + clientText });
+  } else if (['xlsx', 'xls', 'csv'].includes(ext)) {
+    method = 'spreadsheet';
+    if (!stats && !clientText) return await recordFailure('تعذر قراءة جدول البيانات. تأكدي أن الملف غير محمي بكلمة مرور.');
+    const sheetText = studentData ? '' : (clientText ?? '');
+    content.push({ type: 'text', text:
+      (stats ? 'إحصاءات محسوبة برمجياً من البيانات الأصلية (موثوقة — استخدميها كما هي):\n' + JSON.stringify(stats) + '\n\n' : '') +
+      (sheetText ? 'محتوى الجدول:\n' + sheetText.slice(0, 60000) : (studentData ? '(لم تُرسل أسماء الطالبات ولا الصفوف التفصيلية حفاظاً على الخصوصية)' : '')) });
+  } else {
+    method = 'unsupported';
+    return await recordFailure(`صيغة .${ext} لا يمكن قراءتها آلياً. احفظي الملف بصيغة PDF أو DOCX أو XLSX وأعيدي الرفع.`);
+  }
+
+  const allowed = CATEGORY_TYPES[file.category_key] ?? [];
+  const system = [
+    'أنتِ مساعدة متخصصة في لجنة التحصيل الدراسي بمدرسة متوسطة للبنات في المملكة العربية السعودية.',
+    'مهمتك قراءة وثيقة مرفوعة واستخراج معلوماتها بدقة، ثم استدعاء الأداة record_analysis.',
+    'قواعد صارمة:',
+    '- لا تخترعي أي معلومة أو رقم أو نسبة غير موجودة في الوثيقة أو في الإحصاءات المرفقة.',
+    '- أي معلومة لم تجديها صراحةً اكتبيها null وأضيفيها إلى unknown_fields.',
+    '- الإحصاءات المرفقة محسوبة برمجياً من البيانات الأصلية؛ لا تعيدي حسابها ولا تعدّليها.',
+    '- لا تستنتجي تحسناً أو تراجعاً بين فترتين ما لم توجد بيانات مقارنة فعلية.',
+    '- لا تذكري أسماء طالبات في الملخص أو التوصيات.',
+    '- التوصيات اقتراحات منك، وليست نتائج من الوثيقة.',
+    '- إن كانت الوثيقة غير مقروءة أو لا تخص المجلد، وضحي ذلك واجعلي الثقة low.',
+    '- اكتبي بالعربية الفصحى الواضحة.',
+  ].join('\n');
+
+  const instr = [
+    `المجلد: ${cat?.title ?? file.category_key}`,
+    `الأنواع المتوقعة في هذا المجلد: ${allowed.map((t) => DOC_TYPES[t]).join('، ') || 'أي نوع'}`,
+    `اسم الملف: ${file.name}`,
+    file.folder_path ? `المسار داخل المجلد: ${file.folder_path}` : '',
+    CATEGORY_FOCUS[file.category_key] ?? '',
+    checklist.length ? `قائمة العناصر المطلوبة للتحقق من اكتمال الملف (قارني كل عنصر):\n- ${checklist.join('\n- ')}` : 'لا توجد قائمة عناصر معتمدة؛ قيّمي اكتمال الوثيقة بحسب نوعها.',
+  ].filter(Boolean).join('\n');
+  content.push({ type: 'text', text: instr });
+
+  let result: any;
+  try {
+    const data = await claude({
+      max_tokens: 8000, system,
+      tools: [ANALYSIS_TOOL], tool_choice: { type: 'tool', name: 'record_analysis' },
+      messages: [{ role: 'user', content }],
+    });
+    result = toolInput(data, 'record_analysis');
+  } catch (e) {
+    return await recordFailure((e as Error).message);
+  }
+
+  const missing = (result.elements ?? []).filter((e: any) => e.status !== 'present').length;
+  const mismatch = result.doc_type === 'unknown' || (allowed.length && !allowed.includes(result.doc_type));
+  const status = (!mismatch && missing === 0 && result.confidence !== 'low') ? 'read_ok' : 'needs_review';
+  const reason = mismatch ? 'نوع الوثيقة لا يطابق المجلد أو لم يُحدد' :
+    missing ? `${missing} عنصراً ناقصاً أو يحتاج مراجعة` :
+    result.confidence === 'low' ? 'ثقة القراءة منخفضة' : null;
+
+  // ربط المادة والصف تلقائياً إن أمكن
+  const patch: Record<string, unknown> = { status, status_reason: reason, doc_type: result.doc_type };
+  const norm = (s: string) => String(s ?? '').replace(/[ًٌٍَُِّْـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/^ال/, '').trim();
+  if (!file.subject_id && result.extracted?.subject) {
+    const { data: subs } = await svc.from('subjects').select('id, name');
+    const hit = (subs ?? []).find((s: any) => norm(result.extracted.subject).includes(norm(s.name)) || norm(s.name).includes(norm(result.extracted.subject)));
+    if (hit) patch.subject_id = hit.id;
+  }
+  if (!file.grade_id && result.extracted?.grade) {
+    const g = norm(result.extracted.grade);
+    const { data: grs } = await svc.from('grades').select('id, name');
+    const hit = (grs ?? []).find((x: any) =>
+      (g.includes('اول') && x.name.includes('الأول')) || (g.includes('ثاني') && x.name.includes('الثاني')) || (g.includes('ثالث') && x.name.includes('الثالث')));
+    if (hit) patch.grade_id = hit.id;
+  }
+
+  await svc.from('file_analyses').update({ is_latest: false }).eq('file_id', fileId);
+  const { data: saved, error: sErr } = await svc.from('file_analyses').insert({
+    file_id: fileId, method, model: MODEL,
+    doc_type: result.doc_type, doc_type_label: DOC_TYPES[result.doc_type] ?? result.doc_type,
+    extracted: { ...result.extracted, confidence: result.confidence, sections: result.sections ?? [] },
+    elements: result.elements ?? [], stats,
+    summary: result.summary, quality_notes: result.quality_notes ?? [],
+    recommendations: result.recommendations ?? [], unknown_fields: result.unknown_fields ?? [],
+    extracted_text: (clientText && !studentData ? clientText : (result.searchable_text ?? '')).slice(0, 200000),
+  }).select().single();
+  if (sErr) throw new Error(sErr.message);
+  if (keepStatus) { delete patch.status; delete patch.status_reason; }
+  await svc.from('files').update(patch).eq('id', fileId);
+  return json({ ok: true, status: keepStatus ? file.status : status, analysis: saved });
+}
+
+// ---------------------------------------------------------------------
+//  2) المساعد الذكي — يجيب من بيانات النظام فقط وضمن صلاحيات المستخدمة
+// ---------------------------------------------------------------------
+async function assistant(body: any, userDb: any, me: any) {
+  const q = String(body.question ?? '').trim().slice(0, 2000);
+  if (!q) return fail('اكتبي سؤالك');
+  const history = Array.isArray(body.history) ? body.history.slice(-6) : [];
+
+  const [prog, reqs, files, analyses, cats, hits] = await Promise.all([
+    userDb.from('teacher_progress').select('teacher_id, full_name, required, submitted, complete, missing, returned, files, to_review, submit_pct, complete_pct'),
+    userDb.from('requirement_status').select('full_name, title, category_key, due_date, state').neq('state', 'complete').limit(400),
+    userDb.from('files').select('id, name, teacher_id, category_key, status, status_reason, doc_type, created_at').order('created_at', { ascending: false }).limit(400),
+    userDb.from('latest_analyses').select('file_id, doc_type_label, summary, recommendations, elements, stats, unknown_fields').order('created_at', { ascending: false }).limit(120),
+    userDb.from('categories').select('key, title'),
+    userDb.rpc('search_files', { q, lim: 15 }),
+  ]);
+  const names: Record<string, string> = {};
+  (prog.data ?? []).forEach((p: any) => (names[p.teacher_id] = p.full_name));
+  const catT: Record<string, string> = {};
+  (cats.data ?? []).forEach((c: any) => (catT[c.key] = c.title));
+  const fileMap: Record<string, any> = {};
+  (files.data ?? []).forEach((f: any) => (fileMap[f.id] = f));
+
+  const compactStats = (s: any) => {
+    if (!s) return undefined;
+    if (s.kind === 'survey') return { responses: s.responses, overall_pct: s.overall_pct, top: s.top, bottom: s.bottom };
+    if (s.kind === 'grades') {
+      const m = (s.columns ?? []).find((c: any) => c.label === s.main_column);
+      return { students: s.students, main: m && { label: m.label, mean_pct: m.mean_pct, pass_rate: m.pass_rate, mastery_rate: m.mastery_rate },
+        weak_skills: (s.skills ?? []).filter((k: any) => k.status === 'needs_intervention').map((k: any) => k.skill) };
+    }
+    return undefined;
+  };
+
+  const ctx = {
+    'المستخدمة': { الاسم: me.full_name, الصلاحية: me.role },
+    'إنجاز المعلمات': prog.data ?? [],
+    'المتطلبات غير المكتملة': (reqs.data ?? []).map((r: any) => ({ ...r, category: catT[r.category_key] })),
+    'الملفات': (files.data ?? []).map((f: any) => ({ id: f.id, name: f.name, teacher: names[f.teacher_id] ?? (f.teacher_id ? '' : 'عام'), folder: catT[f.category_key], status: f.status, reason: f.status_reason, uploaded: f.created_at?.slice(0, 10) })),
+    'ملخصات التحليل': (analyses.data ?? []).map((a: any) => ({
+      file_id: a.file_id, file: fileMap[a.file_id]?.name, type: a.doc_type_label,
+      summary: String(a.summary ?? '').slice(0, 500),
+      recommendations: (a.recommendations ?? []).slice(0, 4),
+      missing_elements: (a.elements ?? []).filter((e: any) => e.status !== 'present').map((e: any) => e.item),
+      stats: compactStats(a.stats),
+    })),
+    'نتائج البحث في المحتوى': (hits.data ?? []).map((h: any) => ({ file_id: h.file_id, name: h.name, snippet: h.snippet })),
+  };
+  let ctxText = JSON.stringify(ctx);
+  if (ctxText.length > 350000) ctxText = ctxText.slice(0, 350000);
+
+  const system = [
+    'أنتِ المساعد الذكي لمنصة لجنة التحصيل الدراسي في متوسطة خيبر الجنوب.',
+    'أجيبي فقط من البيانات المرفقة (بيانات النظام الحالية ضمن صلاحيات المستخدمة).',
+    'إذا لم تكفِ البيانات للإجابة فقولي ذلك بوضوح ولا تخمني. لا تخترعي أرقاماً.',
+    'عند الإشارة إلى ملف اكتبي رابطه بصيغة [اسم الملف](#/file/<id>). عند الإشارة إلى معلمة اذكري اسمها.',
+    'ميزي بين الحقائق من البيانات والاقتراحات بعبارة "اقتراح:".',
+    'الحالات: unprocessed=لم تتم معالجته، processing=قيد القراءة، read_ok=تمت القراءة بنجاح، needs_review=يحتاج إلى مراجعة، approved=معتمد، needs_completion=يحتاج إلى استكمال، failed=تعذرت القراءة. حالات المتطلبات: missing=لم يُرفع، submitted=مرفوع بانتظار الاعتماد، incomplete=أُعيد للاستكمال.',
+    'أجيبي بالعربية بإيجاز وتنظيم (نقاط عند الحاجة).',
+  ].join('\n');
+
+  const messages = [
+    ...history.filter((m: any) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+      .map((m: any) => ({ role: m.role, content: m.content.slice(0, 4000) })),
+    { role: 'user', content: `بيانات النظام:\n${ctxText}\n\nالسؤال: ${q}` },
+  ];
+  const data = await claude({ max_tokens: 2500, system, messages });
+  const text = (data.content ?? []).filter((c: any) => c.type === 'text').map((c: any) => c.text).join('\n');
+  const ids = [...new Set([...text.matchAll(/#\/file\/([0-9a-f-]{36})/g)].map((m) => m[1]))];
+  return json({ answer: text, sources: ids.map((id) => ({ id, name: fileMap[id]?.name ?? id })) });
+}
+
+// ---------------------------------------------------------------------
+//  3) صياغة نص التقرير من البيانات الفعلية
+// ---------------------------------------------------------------------
+const NARRATIVE_TOOL = {
+  name: 'write_report_text',
+  description: 'كتابة الأجزاء النصية لتقرير لجنة التحصيل الدراسي',
+  input_schema: {
+    type: 'object',
+    properties: {
+      executive_summary: { type: 'string' },
+      key_findings: { type: 'array', items: { type: 'string' } },
+      strengths: { type: 'array', items: { type: 'string' } },
+      improvements: { type: 'array', items: { type: 'string' } },
+      recommendations: { type: 'array', items: { type: 'string' } },
+      actions: { type: 'array', items: { type: 'string' } },
+      data_limits: { type: 'array', items: { type: 'string' }, description: 'ما لا تسمح البيانات باستنتاجه' },
+    },
+    required: ['executive_summary', 'key_findings', 'strengths', 'improvements', 'recommendations', 'actions', 'data_limits'],
+  },
+};
+async function narrative(body: any, me: any) {
+  if (!['principal', 'chair', 'committee'].includes(me.role)) return fail('التقارير الذكية للجنة والإدارة', 403);
+  const dataText = JSON.stringify(body.data ?? {}).slice(0, 250000);
+  const system = [
+    'تكتبين الأجزاء النصية لتقرير رسمي صادر عن لجنة التحصيل الدراسي في متوسطة خيبر الجنوب.',
+    'اعتمدي حصراً على البيانات المرفقة؛ كل رقم تذكرينه يجب أن يكون موجوداً فيها حرفياً.',
+    'لا تستنتجي تحسناً أو تراجعاً دون بيانات مقارنة. اذكري حدود البيانات في data_limits.',
+    'التوصيات والإجراءات المقترحة اقتراحات مهنية واضحة قابلة للتنفيذ.',
+    'لا تذكري أسماء طالبات. أسلوب رسمي بالعربية الفصحى.',
+  ].join('\n');
+  const data = await claude({
+    max_tokens: 4000, system,
+    tools: [NARRATIVE_TOOL], tool_choice: { type: 'tool', name: 'write_report_text' },
+    messages: [{ role: 'user', content: `نوع التقرير: ${String(body.title ?? body.kind ?? '')}\nالبيانات:\n${dataText}` }],
+  });
+  return json({ ok: true, text: toolInput(data, 'write_report_text'), model: MODEL });
+}

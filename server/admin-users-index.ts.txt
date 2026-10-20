@@ -1,0 +1,205 @@
+// =====================================================================
+//  وظيفة إدارة الحسابات — تعمل على خادم Supabase (Edge Function)
+//  الإنشاء / التعديل / إعادة تعيين كلمة المرور / الإيقاف / الحذف
+//  لا تُنفذ أي عملية إلا بعد التحقق من أن المستخدمة مديرة أو رئيسة لجنة.
+// =====================================================================
+import { createClient } from 'npm:@supabase/supabase-js@2';
+
+const URL = Deno.env.get('SUPABASE_URL')!;
+const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
+const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+// نطاق البريد الداخلي لتحويل اسم المستخدم إلى بريد (لا تُرسل أي رسائل إليه)
+const DOMAIN = Deno.env.get('LOGIN_EMAIL_DOMAIN') ?? 'khaybar-tahseel.com';
+
+const cors = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
+const fail = (message: string, status = 400) => json({ error: message }, status);
+
+const USERNAME_RE = /^[a-z0-9][a-z0-9._-]{2,31}$/;
+const ROLES = ['principal', 'chair', 'committee', 'teacher'];
+const emailOf = (u: string) => `${u.toLowerCase()}@${DOMAIN}`;
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
+  if (req.method !== 'POST') return fail('طريقة غير مدعومة', 405);
+
+  const admin = createClient(URL, SERVICE, { auth: { persistSession: false } });
+  let body: any;
+  try { body = await req.json(); } catch { return fail('طلب غير صالح'); }
+  const action = String(body?.action ?? '');
+
+  // ---- حالة التهيئة (عامة) ----
+  const adminCount = async () => {
+    const { count } = await admin.from('profiles').select('id', { count: 'exact', head: true })
+      .in('role', ['principal', 'chair']).eq('active', true);
+    return count ?? 0;
+  };
+  if (action === 'status') {
+    return json({ needs_setup: (await adminCount()) === 0, domain: DOMAIN });
+  }
+
+  // ---- إنشاء أول حساب إداري (مرة واحدة فقط) ----
+  if (action === 'bootstrap') {
+    if ((await adminCount()) > 0) return fail('تمت التهيئة مسبقاً', 403);
+    const setupCode = Deno.env.get('SETUP_CODE');
+    if (setupCode && body.setup_code !== setupCode) return fail('رمز التهيئة غير صحيح', 403);
+    const v = validateNew(body, true);
+    if (v) return fail(v);
+    const role = body.role === 'chair' ? 'chair' : 'principal';
+    return await createAccount(admin, { ...body, role, is_teacher: role !== 'principal' }, null);
+  }
+
+  // ---- بقية العمليات تتطلب مستخدمة إدارية ----
+  const auth = req.headers.get('Authorization') ?? '';
+  const userClient = createClient(URL, ANON, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
+  const { data: u } = await userClient.auth.getUser();
+  if (!u?.user) return fail('يلزم تسجيل الدخول', 401);
+  const { data: me } = await admin.from('profiles').select('id, role, active').eq('id', u.user.id).maybeSingle();
+  if (!me || !me.active || !['principal', 'chair'].includes(me.role)) return fail('هذه العملية للمديرة ورئيسة اللجنة فقط', 403);
+
+  const audit = (act: string, id: string | null, details: unknown) =>
+    admin.from('audit_log').insert({ actor_id: me.id, action: act, entity: 'accounts', entity_id: id, details });
+
+  try {
+    switch (action) {
+      case 'create': {
+        const v = validateNew(body, false);
+        if (v) return fail(v);
+        return await createAccount(admin, body, me.id, audit);
+      }
+
+      case 'update': {
+        const id = String(body.id ?? '');
+        const { data: cur } = await admin.from('profiles').select('*').eq('id', id).maybeSingle();
+        if (!cur) return fail('الحساب غير موجود', 404);
+        const patch: Record<string, unknown> = {};
+        if (body.full_name !== undefined) {
+          const n = String(body.full_name).trim(); if (n.length < 3) return fail('الاسم قصير جداً'); patch.full_name = n;
+        }
+        if (body.employee_code !== undefined) patch.employee_code = String(body.employee_code || '').trim() || null;
+        if (body.is_teacher !== undefined) patch.is_teacher = !!body.is_teacher;
+        if (body.onedrive_url !== undefined) {
+          const od = cleanUrl(body.onedrive_url);
+          if (od === false) return fail('رابط OneDrive يجب أن يبدأ بـ https://');
+          patch.onedrive_url = od;
+        }
+        if (body.role !== undefined) {
+          if (!ROLES.includes(body.role)) return fail('صلاحية غير معروفة');
+          if (id === me.id && body.role !== cur.role) return fail('لا يمكنك تغيير صلاحيتك بنفسك');
+          patch.role = body.role;
+        }
+        if (body.username !== undefined && body.username !== cur.username) {
+          const un = String(body.username).toLowerCase().trim();
+          if (!USERNAME_RE.test(un)) return fail('اسم المستخدم: أحرف إنجليزية صغيرة وأرقام فقط (3 أحرف على الأقل)');
+          const { error } = await admin.auth.admin.updateUserById(id, { email: emailOf(un), email_confirm: true });
+          if (error) return fail(translate(error.message));
+          patch.username = un;
+        }
+        const { error } = await admin.from('profiles').update(patch).eq('id', id);
+        if (error) return fail(translate(error.message));
+        if (Array.isArray(body.assignments)) await setAssignments(admin, id, body.assignments);
+        await audit('update_account', id, patch);
+        return json({ ok: true });
+      }
+
+      case 'reset_password': {
+        const id = String(body.id ?? '');
+        const pw = String(body.password ?? '');
+        if (pw.length < 8) return fail('كلمة المرور 8 أحرف على الأقل');
+        const { error } = await admin.auth.admin.updateUserById(id, { password: pw });
+        if (error) return fail(translate(error.message));
+        await audit('reset_password', id, {});
+        return json({ ok: true });
+      }
+
+      case 'set_active': {
+        const id = String(body.id ?? '');
+        const active = !!body.active;
+        if (id === me.id && !active) return fail('لا يمكنك إيقاف حسابك');
+        const { error } = await admin.auth.admin.updateUserById(id, { ban_duration: active ? 'none' : '876000h' });
+        if (error) return fail(translate(error.message));
+        await admin.from('profiles').update({ active }).eq('id', id);
+        await audit(active ? 'enable_account' : 'disable_account', id, {});
+        return json({ ok: true });
+      }
+
+      case 'delete': {
+        const id = String(body.id ?? '');
+        if (id === me.id) return fail('لا يمكنك حذف حسابك');
+        const { count } = await admin.from('files').select('id', { count: 'exact', head: true }).eq('teacher_id', id);
+        if ((count ?? 0) > 0) return fail('لهذه المعلمة ملفات محفوظة؛ أوقفي الحساب بدلاً من حذفه للمحافظة على الملفات');
+        const { error } = await admin.auth.admin.deleteUser(id);
+        if (error) return fail(translate(error.message));
+        await audit('delete_account', id, {});
+        return json({ ok: true });
+      }
+
+      default:
+        return fail('عملية غير معروفة');
+    }
+  } catch (e) {
+    console.error(e);
+    return fail('حدث خطأ غير متوقع: ' + (e as Error).message, 500);
+  }
+});
+
+function validateNew(b: any, bootstrap: boolean): string | null {
+  const un = String(b.username ?? '').toLowerCase().trim();
+  if (!USERNAME_RE.test(un)) return 'اسم المستخدم: أحرف إنجليزية صغيرة وأرقام فقط (3 أحرف على الأقل)';
+  if (String(b.password ?? '').length < 8) return 'كلمة المرور 8 أحرف على الأقل';
+  if (String(b.full_name ?? '').trim().length < 3) return 'الاسم مطلوب';
+  if (!bootstrap && b.role && !ROLES.includes(b.role)) return 'صلاحية غير معروفة';
+  return null;
+}
+
+async function createAccount(admin: any, b: any, actor: string | null, audit?: Function) {
+  const un = String(b.username).toLowerCase().trim();
+  const { data: exists } = await admin.from('profiles').select('id').eq('username', un).maybeSingle();
+  if (exists) return fail('اسم المستخدم مستخدم مسبقاً');
+  const { data, error } = await admin.auth.admin.createUser({
+    email: emailOf(un), password: String(b.password), email_confirm: true,
+    user_metadata: { full_name: String(b.full_name).trim() },
+  });
+  if (error || !data?.user) return fail(translate(error?.message ?? 'تعذر إنشاء الحساب'));
+  const role = ROLES.includes(b.role) ? b.role : 'teacher';
+  const { error: pErr } = await admin.from('profiles').insert({
+    id: data.user.id, username: un, full_name: String(b.full_name).trim(), role,
+    employee_code: b.employee_code ? String(b.employee_code).trim() : null,
+    is_teacher: b.is_teacher === undefined ? role !== 'principal' : !!b.is_teacher,
+    onedrive_url: cleanUrl(b.onedrive_url) || null,
+    active: true,
+  });
+  if (pErr) {
+    await admin.auth.admin.deleteUser(data.user.id);
+    return fail(translate(pErr.message));
+  }
+  if (Array.isArray(b.assignments)) await setAssignments(admin, data.user.id, b.assignments);
+  if (audit) await audit('create_account', data.user.id, { username: un, role });
+  return json({ ok: true, id: data.user.id });
+}
+
+async function setAssignments(admin: any, id: string, list: any[]) {
+  await admin.from('teacher_assignments').delete().eq('teacher_id', id);
+  const rows = list
+    .filter((a) => Number(a.subject_id) && Number(a.grade_id))
+    .map((a) => ({ teacher_id: id, subject_id: Number(a.subject_id), grade_id: Number(a.grade_id) }));
+  if (rows.length) await admin.from('teacher_assignments').upsert(rows);
+}
+
+// يقبل روابط https فقط؛ يعيد null للفارغ و false للرابط غير الصالح
+function cleanUrl(u: unknown): string | null | false {
+  const s = String(u ?? '').trim();
+  if (!s) return null;
+  return /^https:\/\/\S+$/i.test(s) && s.length < 2000 ? s : false;
+}
+
+function translate(m: string) {
+  if (/already (been )?registered|already exists|duplicate/i.test(m)) return 'اسم المستخدم مستخدم مسبقاً';
+  if (/password/i.test(m)) return 'كلمة المرور غير مقبولة: ' + m;
+  return m;
+}
