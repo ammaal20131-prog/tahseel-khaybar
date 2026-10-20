@@ -1,0 +1,35 @@
+// يُشغَّل داخل صفحة OneDrive (asrgirls-my.sharepoint.com) — ضعي رابط القائمة في MURL
+const MURL = '__MANIFEST_URL__';
+const H = { Accept: 'application/json;odata=nometadata' };
+const enc = (s) => encodeURIComponent(s.replace(/'/g, "''"));
+const me = await (await fetch('/_api/SP.UserProfiles.PeopleManager/GetMyProperties?$select=PersonalUrl', { headers: H })).json();
+const pu = new URL(me.PersonalUrl).pathname.replace(/\/$/, '');
+const digest = (await (await fetch(pu + '/_api/contextinfo', { method: 'POST', headers: H })).json()).FormDigestValue;
+const m = await (await fetch(MURL)).json();
+const made = new Set();
+const ensure = async (dir) => {
+  let cur = pu + '/Documents';
+  for (const part of (m.root + '/' + dir).split('/')) {
+    cur += '/' + part;
+    if (made.has(cur)) continue;
+    await fetch(pu + "/_api/web/folders/add('" + enc(cur) + "')", { method: 'POST', headers: { ...H, 'X-RequestDigest': digest } });
+    made.add(cur);
+  }
+};
+let added = 0, skipped = 0; const errors = [];
+for (const it of m.items) {
+  const i = it.path.lastIndexOf('/'); const dir = it.path.slice(0, i), name = it.path.slice(i + 1);
+  const full = pu + '/Documents/' + m.root + '/' + it.path;
+  try {
+    const ex = await fetch(pu + "/_api/web/GetFileByServerRelativeUrl('" + enc(full) + "')?$select=Length", { headers: H });
+    if (ex.ok && Number((await ex.json()).Length) === Number(it.size)) { skipped++; continue; }
+    await ensure(dir);
+    const fr = await fetch(it.url); if (!fr.ok) throw new Error('download ' + fr.status);
+    const blob = await fr.blob();
+    const r = await fetch(pu + "/_api/web/GetFolderByServerRelativeUrl('" + enc(pu + '/Documents/' + m.root + '/' + dir) + "')/Files/add(url='" + enc(name) + "',overwrite=true)",
+      { method: 'POST', headers: { ...H, 'X-RequestDigest': digest }, body: blob });
+    if (!r.ok) throw new Error('upload ' + r.status);
+    added++;
+  } catch (e) { errors.push(it.path + ': ' + e.message); }
+}
+JSON.stringify({ total: m.items.length, added, skipped, errors });
