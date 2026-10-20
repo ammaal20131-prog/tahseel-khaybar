@@ -6,6 +6,8 @@ import { REPORT_KINDS } from './reports.js';
 import { getXLSX } from '../extract.js';
 import { comparePeriods } from '../stats.js';
 import { NAFES_KEY, NAFES_REQS, nafesSubjectIds } from '../nafes.js';
+import { aiReady, showAiSetup, aiBadge } from '../ai-help.js';
+import { getTheme, logo2Url, themeStyle, ensureFont } from '../theme.js';
 
 const pct = (a, b) => (b ? Math.round((1000 * a) / b) / 10 : 0);
 
@@ -39,7 +41,7 @@ async function builder(view, kind, query) {
     if (e.target.semester.value.trim()) p.set('semester', e.target.semester.value.trim());
     location.hash = `#/report/new/${kind}` + (p.toString() ? '?' + p : '');
   });
-  return show(view.querySelector('[data-report]'), content, { filters });
+  return show(view.querySelector('[data-report]'), content, { filters, autoAI: query.ai === '1' });
 }
 
 // ---------------------------------------------------------------------
@@ -274,13 +276,27 @@ function reportHtml(C, saved) {
   const N = C.narrative;
   const aiTag = '<span class="ai-tag">صياغة بالذكاء الاصطناعي — راجعيها قبل الاعتماد</span>';
   const list = (arr) => `<ul>${arr.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`;
-  return `<article class="report" id="report-doc">
-    <header class="rh">
-      <img src="${esc(App.settings?.logo_path ? App.logoUrl : 'assets/moe-logo.png')}" alt="وزارة التعليم">
-      <div class="c"><div>وزارة التعليم — ${esc(H.directorate || '')}</div><div>${esc(H.school || '')} — ${esc(H.committee || '')}</div><h1>${esc(C.title)}</h1></div>
-      <div class="m">العام الدراسي: ${esc(H.year || '')}<br>${esc(H.semester || '')}<br>تاريخ الإصدار: ${fmtDate(C.generated_at)}<br>${esc(fmtHijri(C.generated_at))}
-        ${saved ? `<br>الحالة: ${saved.approved ? 'معتمد' : 'غير معتمد'}` : ''}</div>
-    </header>
+  const T = getTheme();
+  ensureFont(T.font);
+  const logo1 = App.settings?.logo_path ? App.logoUrl : (T.header === 'band' ? 'assets/moe-logo-white.png' : 'assets/moe-logo.png');
+  const l2 = logo2Url(T);
+  const meta = `العام الدراسي: ${esc(H.year || '')}<br>${esc(H.semester || '')}<br>تاريخ الإصدار: ${fmtDate(C.generated_at)}<br>${esc(fmtHijri(C.generated_at))}${saved ? `<br>الحالة: ${saved.approved ? 'معتمد' : 'غير معتمد'}` : ''}`;
+  const lines = `<div>وزارة التعليم — ${esc(H.directorate || '')}</div><div>${esc(H.school || '')} — ${esc(H.committee || '')}</div>`;
+  const header = T.header === 'centered'
+    ? `<header class="rh rh-centered"><div class="logos"><img src="${esc(logo1)}" alt="وزارة التعليم">${l2 ? `<img src="${esc(l2)}" alt="الشعار">` : ''}</div>
+        <div class="c">${lines}<h1>${esc(C.title)}</h1></div><div class="m m-row">${meta.replace(/<br>/g, ' · ')}</div></header>`
+    : `<header class="rh ${T.header === 'band' ? 'rh-band' : ''}"><img src="${esc(logo1)}" alt="وزارة التعليم">
+        <div class="c">${lines}<h1>${esc(C.title)}</h1></div>
+        <div class="m">${l2 ? `<img class="l2" src="${esc(l2)}" alt="الشعار"><br>` : ''}${meta}</div></header>`;
+  const cover = T.cover ? `<section class="r-cover"><div class="logos"><img src="${esc(App.settings?.logo_path ? App.logoUrl : 'assets/moe-logo.png')}" alt="وزارة التعليم">${l2 ? `<img src="${esc(l2)}" alt="الشعار">` : ''}</div>
+      <div class="cv-sub">${esc(H.directorate || '')}</div><div class="cv-sub">${esc(H.school || '')}</div>
+      <h1>${esc(C.title)}</h1><div class="cv-line"></div><div class="cv-sub">${esc(H.committee || '')}</div>
+      <div class="cv-meta">العام الدراسي ${esc(H.year || '')} — ${esc(H.semester || '')}<br>${fmtDate(C.generated_at)} — ${esc(fmtHijri(C.generated_at))}</div></section>` : '';
+  const sigs = (T.sig || []).filter((x) => x.title || x.name).map((x, i) => `<div>${esc(x.title)}<br>${esc(x.name || (i === 1 ? H.principal || '' : ''))}<br>التوقيع: ....................</div>`).join('');
+  return `<article class="report ${T.stripe_tables ? 'striped' : ''}" id="report-doc" style="${themeStyle(T)}">
+    ${T.watermark ? `<div class="r-wm" aria-hidden="true">${esc(T.watermark)}</div>` : ''}
+    ${cover}
+    ${header}
     <h2>الملخص التنفيذي ${N ? aiTag : ''}</h2>
     ${N?.executive_summary ? `<p>${esc(N.executive_summary)}</p>` : ''}
     ${C.facts.length ? `<table><tbody>${C.facts.map((f) => `<tr><th style="width:55%">${esc(f.label)}</th><td class="num"><b>${esc(f.value)}</b></td></tr>`).join('')}</tbody></table>` : ''}
@@ -299,14 +315,15 @@ function reportHtml(C, saved) {
     <h2>المرفقات والمصادر</h2>
     <p style="font-size:.85rem">جميع الأرقام في هذا التقرير محسوبة من البيانات المرفوعة في المنصة${C.filters?.semester ? ` (الفصل: ${esc(C.filters.semester)})` : ''}. ${N ? 'الأجزاء الموسومة بالذكاء الاصطناعي مقترحات تحتاج مراجعة بشرية.' : ''}</p>
     ${C.sources.length ? `<ol style="font-size:.8rem">${C.sources.map((s) => `<li><a href="#/file/${esc(s.id)}">${esc(s.name)}</a> — ${esc(s.teacher)} — ${esc(s.folder)}</li>`).join('')}</ol>` : '<p class="muted" style="font-size:.85rem">بيانات الإنجاز والمتطلبات من قاعدة بيانات المنصة.</p>'}
-    <div class="sig"><div>رئيسة لجنة التحصيل الدراسي<br><br>التوقيع: ....................</div><div>مديرة المدرسة<br>${esc(H.principal || '')}<br>التوقيع: ....................</div></div>
+    ${sigs ? `<div class="sig" style="grid-template-columns:repeat(${Math.min(4, (T.sig || []).filter((x) => x.title || x.name).length)},1fr)">${sigs}</div>` : ''}
+    ${T.footer ? `<footer class="r-foot">${esc(T.footer)}</footer>` : ''}
   </article>`;
 }
 
-async function show(view, C, { saved, filters } = {}) {
+async function show(view, C, { saved, filters, autoAI } = {}) {
   view.innerHTML = `
     <div class="row no-print" style="margin-bottom:12px">
-      ${App.isStaff && !saved ? `<button class="btn" data-ai>${icon('sparkles')} صياغة الملخص والتوصيات بالذكاء الاصطناعي</button>` : ''}
+      ${App.isStaff && !saved ? `<button class="btn ai-btn" data-ai>${icon('sparkles')} توليد الملخص والتوصيات بالذكاء الاصطناعي${aiBadge()}</button>` : ''}
       ${App.isStaff && !saved ? `<button class="btn primary" data-save>${icon('save')} حفظ التقرير</button>` : ''}
       ${saved && App.isAdmin ? `<button class="btn ${saved.approved ? '' : 'primary'}" data-approve>${icon('badge-check')} ${saved.approved ? 'إلغاء الاعتماد' : 'اعتماد التقرير'}</button>` : ''}
       <span class="spacer"></span>
@@ -323,24 +340,29 @@ async function show(view, C, { saved, filters } = {}) {
     let Ch; try { Ch = await Chart(); } catch (e) { return; }
     view.querySelectorAll('[data-chart]').forEach((cv) => {
       const c = C.charts[cv.dataset.chart];
-      charts.push(new Ch(cv, { type: c.type, data: { labels: c.labels, datasets: c.datasets.map((d) => ({ ...d, backgroundColor: '#0d6b52', borderRadius: 5 })) },
-        options: { indexAxis: c.horizontal ? 'y' : 'x', maintainAspectRatio: false, animation: false, plugins: { legend: { display: false }, title: { display: true, text: c.title, color: '#0f3d3c' } },
+      const T = getTheme();
+      charts.push(new Ch(cv, { type: c.type, data: { labels: c.labels, datasets: c.datasets.map((d) => ({ ...d, backgroundColor: T.accent, borderRadius: 5 })) },
+        options: { indexAxis: c.horizontal ? 'y' : 'x', maintainAspectRatio: false, animation: false, plugins: { legend: { display: false }, title: { display: true, text: c.title, color: T.primary, font: { family: T.font } } },
           scales: { [c.horizontal ? 'x' : 'y']: { beginAtZero: true, ...(c.max ? { max: c.max } : {}), ticks: { color: '#333' } }, [c.horizontal ? 'y' : 'x']: { ticks: { color: '#333' }, ...(c.horizontal ? { position: 'right' } : {}) } } } }));
     });
   };
   draw();
   const redraw = () => { view.querySelector('[data-doc-wrap]').innerHTML = reportHtml(C, saved); refreshIcons(); draw(); };
 
-  view.querySelector('[data-ai]')?.addEventListener('click', async (e) => {
-    await withBusy(e.currentTarget, async () => {
+  const runAI = async (btn) => {
+    await withBusy(btn, async () => {
+      if (!(await aiReady())) { showAiSetup(); return; }
       try {
         const data = { title: C.title, header: C.header, facts: C.facts, tables: C.tables.map((t) => ({ ...t, rows: t.rows.slice(0, 80) })), lists: C.lists, notes: C.notes };
         const r = await fn('ai', { action: 'narrative', kind: C.kind, title: C.title, data });
         C.narrative = r.text; C.narrative_model = r.model;
-        redraw(); toast('تمت الصياغة — راجعي النص قبل الحفظ والاعتماد', 'ok');
+        redraw(); toast('تم التوليد — راجعي النص قبل الحفظ والاعتماد', 'ok');
       } catch (ex) { toast(errMsg(ex), 'bad', 7000); }
     });
-  });
+    if (C.narrative && btn.isConnected) { btn.innerHTML = `${icon('refresh-cw')} إعادة التوليد بالذكاء الاصطناعي`; refreshIcons(); }
+  };
+  view.querySelector('[data-ai]')?.addEventListener('click', (e) => runAI(e.currentTarget));
+  if (autoAI && view.querySelector('[data-ai]')) runAI(view.querySelector('[data-ai]'));
   view.querySelector('[data-save]')?.addEventListener('click', async (e) => {
     await withBusy(e.currentTarget, async () => {
       const { data, error } = await sb.from('reports').insert({ kind: C.kind, title: C.title, params: filters || {}, content: C, teacher_id: filters?.teacher || null, created_by: App.user.id }).select().single();
@@ -386,9 +408,11 @@ async function show(view, C, { saved, filters } = {}) {
       const cv = view.querySelector(`[data-chart="${b.querySelector('canvas')?.dataset.chart}"]`);
       if (cv) { const img = document.createElement('img'); img.src = cv.toDataURL('image/png'); img.style.width = '15cm'; b.replaceWith(img); } else b.remove();
     });
-    doc.querySelectorAll('header img').forEach((img) => { img.src = new URL(img.getAttribute('src'), location.href).href; img.style.width = '2.6cm'; });
+    doc.querySelectorAll('img').forEach((img) => { if (!img.src.startsWith('data:')) img.src = new URL(img.getAttribute('src'), location.href).href; if (img.closest('header,.r-cover')) img.style.width = '2.6cm'; });
+    doc.querySelector('.r-wm')?.remove();
+    const T = getTheme();
     const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${esc(C.title)}</title>
-      <style>body{font-family:'Sakkal Majalla','Traditional Arabic',Arial;direction:rtl;font-size:13pt}table{border-collapse:collapse;width:100%;margin:6pt 0}td,th{border:1px solid #999;padding:4pt;text-align:right;font-size:11pt}th{background:#eef4f1}h1{font-size:18pt;color:#0f3d3c;text-align:center}h2{font-size:14pt;color:#0f3d3c;border-right:4pt solid #b48a2f;padding-right:6pt}.ai-tag{font-size:9pt;color:#5b4aa8}.rh{border-bottom:2pt solid #b48a2f}.sig{margin-top:30pt}</style></head><body>${doc.outerHTML}</body></html>`;
+      <style>body{font-family:'${T.font}','Sakkal Majalla','Traditional Arabic',Arial;direction:rtl;font-size:13pt}table{border-collapse:collapse;width:100%;margin:6pt 0}td,th{border:1px solid #999;padding:4pt;text-align:right;font-size:11pt}th{background:${T.soft};color:${T.primary}}h1{font-size:18pt;color:${T.primary};text-align:center}h2{font-size:14pt;color:${T.primary};border-right:4pt solid ${T.accent};padding-right:6pt}.ai-tag{font-size:9pt;color:#5b4aa8}.rh{border-bottom:2pt solid ${T.accent}}.r-cover{text-align:center;page-break-after:always}.r-cover h1{font-size:26pt;margin-top:60pt}.sig{margin-top:30pt}.r-foot{font-size:9pt;color:#666;text-align:center;border-top:1pt solid ${T.accent};margin-top:20pt}</style></head><body>${doc.outerHTML}</body></html>`;
     downloadBlob(new Blob(['﻿' + html], { type: 'application/msword' }), `${C.title}.doc`);
   });
   return () => charts.forEach((c) => c.destroy());
