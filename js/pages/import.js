@@ -93,8 +93,15 @@ export default async function importPage(view) {
 
   function analyzeTree() {
     // إزالة المجلد الجذري المشترك
+    // ما يُحذف من المجلدات العليا المشتركة يُفحص أولاً: إن كان اسم مجلد معروف أو اسم معلمة يُعتمد لكل الملفات
     const split = entries.map((e) => e.path.split('/').filter(Boolean));
-    while (split.length && split.every((p) => p.length > 2 && p[0] === split[0][0])) split.forEach((p) => p.shift());
+    let rootCat = null, rootTeacher = null;
+    while (split.length && split.every((p) => p.length > 2 && p[0] === split[0][0])) {
+      const seg = split[0][0];
+      rootCat ||= matchCategory(seg);
+      rootTeacher ||= matchTeacher(seg, people);
+      split.forEach((p) => p.shift());
+    }
     entries.forEach((e, i) => { e.parts = split[i]; });
     // تحديد الترتيب: مجلد ثم معلمة، أو معلمة ثم مجلد
     const lvl1 = [...new Set(entries.map((e) => e.parts[0]))];
@@ -110,7 +117,7 @@ export default async function importPage(view) {
       if (!gmap.has(key)) {
         const cat = matchCategory(catName);
         const t = teacherName ? matchTeacher(teacherName, people) : null;
-        gmap.set(key, { key, catName, teacherName, cat, teacher: t, files: [] });
+        gmap.set(key, { key, catName, teacherName, cat, teacher: t || rootTeacher, files: [] });
       }
       const g = gmap.get(key);
       e.rest = rest;
@@ -118,6 +125,14 @@ export default async function importPage(view) {
     }
     groups = [...gmap.values()];
     groups.forEach((g) => {
+      // إن لم يُعرف المجلد من اسمه: من المجلد الأعلى، ثم من أسماء الملفات (مثل "الخطة العلاجية")، ويبقى اسمه مجلداً فرعياً
+      if (!g.cat) {
+        const counts = {};
+        g.files.forEach((e) => { const c = matchCategory(e.name.replace(/\.[^.]+$/, '')); if (c) counts[c] = (counts[c] || 0) + 1; });
+        const fromFiles = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0] || null;
+        g.cat = rootCat || fromFiles;
+        if (g.cat) { g.guessed = true; if (g.catName) g.catAsFolder = true; }
+      }
       if (g.teacher === null && g.teacherName) g.unknownTeacher = true;
       if (!catOf(g.cat)?.per_teacher) g.teacher = null;
     });
@@ -134,12 +149,14 @@ export default async function importPage(view) {
         <div class="row"><span class="chip">${fmtNum(folders)} مجلد</span><span class="chip">${fmtNum(total)} ملف</span>${bad ? `<span class="chip bad">${fmtNum(bad)} صيغة غير مسموحة ستُتجاهل</span>` : ''}</div></div>
       ${groups.length ? `<div class="table-wrap"><table><thead><tr><th>المجلد في الملف</th><th>يُستورد إلى</th><th>المعلمة</th><th>الملفات</th></tr></thead><tbody>
       ${groups.map((g, i) => `<tr>
-        <td><div><b>${esc(g.catName || '(جذر)')}</b>${g.teacherName ? ` / ${esc(g.teacherName)}` : ''}</div></td>
-        <td><select data-gcat="${i}"><option value="">— تجاهل —</option>${App.categories.map((c) => `<option value="${c.key}" ${g.cat === c.key ? 'selected' : ''}>${esc(c.title)}</option>`).join('')}</select></td>
+        <td><div><b>${esc(g.catName || '(جذر)')}</b>${g.teacherName ? ` / ${esc(g.teacherName)}` : ''}</div>${g.catAsFolder ? '<div class="muted" style="font-size:.78rem">يُحفظ مجلداً فرعياً بهذا الاسم</div>' : ''}</td>
+        <td>${g.guessed ? '<div class="chip info" style="margin-bottom:4px">اقتراح تلقائي — تحققي منه</div>' : ''}<select data-gcat="${i}"><option value="">— تجاهل —</option>${App.categories.map((c) => `<option value="${c.key}" ${g.cat === c.key ? 'selected' : ''}>${esc(c.title)}</option>`).join('')}</select></td>
         <td>${catOf(g.cat)?.per_teacher ? `<select data-gt="${i}"><option value="">— غير محددة (تُحفظ في المجلد المشترك للمراجعة) —</option>${people.map((p) => `<option value="${p.id}" ${g.teacher === p.id ? 'selected' : ''}>${esc(p.full_name)}</option>`).join('')}</select>
           ${g.unknownTeacher && !g.teacher ? '<div class="chip warn" style="margin-top:4px">لم يُتعرف على المعلمة</div>' : ''}` : '<span class="muted">مجلد مشترك</span>'}</td>
         <td class="num">${fmtNum(g.files.length)}</td></tr>`).join('')}
-      </tbody></table></div>` : emptyState('لا توجد ملفات', 'folder')}
+      </tbody></table></div>
+      ${groups.some((g) => catOf(g.cat)?.per_teacher) ? `<div class="row" style="margin-top:10px;gap:8px;align-items:center"><span class="muted" style="font-size:.86rem">${icon('user-check')} تعيين معلمة واحدة لكل المجلدات:</span>
+        <select data-allt><option value="">— اختاري —</option>${people.map((p) => `<option value="${p.id}">${esc(p.full_name)}</option>`).join('')}</select></div>` : ''}` : emptyState('لا توجد ملفات', 'folder')}
       <details style="margin-top:12px"><summary class="muted">عرض شجرة الملفات كاملة</summary><div class="tree" style="margin-top:8px">${treeHtml(entries)}</div></details>
       <div class="divider"></div>
       <label class="check"><input type="checkbox" data-skipdup checked> تخطي الملفات المكررة (المطابقة تماماً لملفات موجودة)</label>
@@ -150,6 +167,7 @@ export default async function importPage(view) {
     refreshIcons();
     prev.querySelectorAll('[data-gcat]').forEach((s) => s.addEventListener('change', () => { const g = groups[s.dataset.gcat]; g.cat = s.value || null; if (!catOf(g.cat)?.per_teacher) g.teacher = null; renderPreview(); }));
     prev.querySelectorAll('[data-gt]').forEach((s) => s.addEventListener('change', () => { groups[s.dataset.gt].teacher = s.value || null; }));
+    prev.querySelector('[data-allt]')?.addEventListener('change', (ev) => { const v = ev.target.value; if (!v) return; groups.forEach((g) => { if (catOf(g.cat)?.per_teacher) { g.teacher = v; g.unknownTeacher = false; } }); renderPreview(); });
     prev.querySelector('[data-go]')?.addEventListener('click', () => runImport(prev.querySelector('[data-skipdup]').checked, prev.querySelector('[data-ai]').checked));
   }
 
@@ -181,6 +199,7 @@ export default async function importPage(view) {
         if (perTeacher && !owner) rep.unknown_owner.push(e.path);
         // المستوى الثاني إن لم يكن معلمة معروفة يبقى مجلداً فرعياً باسمه
         if (g.teacherName && (!perTeacher || !owner)) rest = [g.teacherName, ...rest];
+        if (g.catAsFolder) rest = [g.catName, ...rest];
         const folderPath = rest.join('/');
         if (folderPath) rep.folders.add(`${g.cat}/${owner || 'general'}/${folderPath}`);
         const row = await uploadOne({ file, category: g.cat, teacherId: owner, folderPath, hash, importJobId: job?.id });
