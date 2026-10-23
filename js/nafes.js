@@ -26,7 +26,7 @@ export const NAFES_REQS = [
     checklist: ['وصف النشاط أو التدريب', 'التاريخ', 'الفئة المستهدفة'] },
 ];
 // المعلمات المستهدفات افتراضياً (الثالث المتوسط) — تُعدَّل من زر «تحديد معلمات نافس» في مجلد نافس
-export const NAFES_DEFAULT_USERNAMES = ['najwa', 'fatima', 'salma', 'haya', 'ghazwa'];
+export const NAFES_DEFAULT_USERNAMES = ['najwa', 'fatima', 'salma', 'aisha', 'ghazwa'];
 const MANUAL_SORT = 10; // متطلبات أضافتها الإدارة يدوياً
 
 export const NAFES_SECTIONS = ['نتائج نافس السابقة', 'الاختبارات التجريبية', 'الخطط العلاجية', 'شواهد التهيئة'];
