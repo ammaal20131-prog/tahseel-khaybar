@@ -29,7 +29,7 @@ const ROSTER = [
   [P.t2, 'salma', 'الأستاذة سلمى فلاح', 'teacher', true, 'اللغة العربية'],
   [P.fatima, 'fatima', 'الأستاذة فاطمة عون', 'teacher', true, 'اللغة العربية'],
   // قسم العلوم
-  [P.t1, 'ghazwa', 'الأستاذة غزوة العتيبي', 'teacher', true, 'العلوم'],
+  [P.t1, 'ghazwa', 'الأستاذة غزوا العتيبي', 'teacher', true, 'العلوم'],
   [P.haya, 'haya', 'الأستاذة هيا الشهراني', 'committee', true, 'العلوم'],
   [P.asha, 'asha', 'الأستاذة عاشة الشهراني', 'teacher', true, 'العلوم'],
   // قسم التربية الأسرية
@@ -104,12 +104,12 @@ function seed() {
 
   let id = F(P.t1, 'remedial', 'الخطة العلاجية - علوم أول متوسط.pdf', 'needs_review', { subject: 'العلوم', grade: 1, doc_type: 'remedial_plan', reason: 'عنصران ناقصان', ago: 1 });
   A(id, { doc_type: 'remedial_plan', doc_type_label: 'خطة علاجية', summary: 'خطة علاجية لطالبات الصف الأول المتوسط في مادة العلوم تستهدف ضعف مهارات قراءة الرسوم البيانية وتفسير التجارب. تتضمن أنشطة علاجية أسبوعية ومتابعة كل أسبوعين، لكنها لا تحدد مؤشرات واضحة لقياس الأثر ولا أسباب الضعف.',
-    extracted: { teacher_name: 'الأستاذة غزوة العتيبي', subject: 'العلوم', grade: 'الأول المتوسط', semester: 'الفصل الدراسي الأول', academic_year: '1448هـ', date: null, week: null, title: 'خطة علاجية', confidence: 'high',
+    extracted: { teacher_name: 'الأستاذة غزوا العتيبي', subject: 'العلوم', grade: 'الأول المتوسط', semester: 'الفصل الدراسي الأول', academic_year: '1448هـ', date: null, week: null, title: 'خطة علاجية', confidence: 'high',
       sections: [{ title: 'الأهداف', items: ['تحسين قراءة الرسوم البيانية', 'تفسير نتائج التجارب البسيطة'] }, { title: 'الإجراءات والأنشطة', items: ['بطاقات تدريبية أسبوعية', 'تعلم بالأقران', 'أوراق عمل متدرجة'] }, { title: 'الفئات المستهدفة', items: ['6 طالبات من الصف الأول المتوسط (أ)'] }] },
     elements: [{ item: 'الفئة المستهدفة', status: 'present', note: '6 طالبات' }, { item: 'مظاهر الضعف', status: 'present', note: 'قراءة الرسوم البيانية' }, { item: 'أسباب الضعف', status: 'missing', note: 'لم تُذكر أسباب الضعف' }, { item: 'الأنشطة العلاجية', status: 'present', note: 'بطاقات وأوراق عمل' }, { item: 'فترات المتابعة', status: 'present', note: 'كل أسبوعين' }, { item: 'مؤشرات قياس الأثر', status: 'missing', note: 'لا توجد أداة قياس قبلي/بعدي' }],
     quality_notes: ['الخطة مكتوبة بوضوح ومنظمة في جدول'], recommendations: ['إضافة قياس قبلي وبعدي لتحديد أثر الخطة', 'تحديد أسباب الضعف لكل طالبة (معرفية، أسرية، ذاتية)'], unknown_fields: ['التاريخ'] });
   id = F(P.t1, 'weekly', 'الخطة الأسبوعية - الأسبوع 6.pdf', 'approved', { subject: 'العلوم', grade: 1, path: 'العلوم/الأول المتوسط', ago: 3 });
-  A(id, { doc_type: 'weekly_plan', doc_type_label: 'خطة أسبوعية', summary: 'خطة الأسبوع السادس لمادة العلوم للصف الأول المتوسط تشمل درسَي الخلية ووظائفها مع واجب وتقويم ختامي.', extracted: { teacher_name: 'الأستاذة غزوة العتيبي', subject: 'العلوم', grade: 'الأول المتوسط', semester: null, academic_year: null, date: null, week: 'الأسبوع السادس', title: 'الخطة الأسبوعية', confidence: 'high', sections: [{ title: 'موضوعات الدروس', items: ['الخلية', 'وظائف أجزاء الخلية'] }] },
+  A(id, { doc_type: 'weekly_plan', doc_type_label: 'خطة أسبوعية', summary: 'خطة الأسبوع السادس لمادة العلوم للصف الأول المتوسط تشمل درسَي الخلية ووظائفها مع واجب وتقويم ختامي.', extracted: { teacher_name: 'الأستاذة غزوا العتيبي', subject: 'العلوم', grade: 'الأول المتوسط', semester: null, academic_year: null, date: null, week: 'الأسبوع السادس', title: 'الخطة الأسبوعية', confidence: 'high', sections: [{ title: 'موضوعات الدروس', items: ['الخلية', 'وظائف أجزاء الخلية'] }] },
     elements: ['المادة', 'الصف', 'الأسبوع الدراسي', 'موضوعات الدروس', 'الأهداف التعليمية', 'الواجبات والأنشطة', 'أساليب التقويم'].map((item) => ({ item, status: 'present', note: '' })) });
   db.file_notes.push({ id: uid(), file_id: id, author_id: P.chair, kind: 'approve', body: 'خطة مكتملة', created_at: daysAgo(1) });
   const rows = [['م', 'اسم الطالبة', 'الاختبار القصير (10)', 'اختبار الفترة من 20', 'المجموع'], ['', 'الدرجة العظمى', 10, 20, 30]];
@@ -431,6 +431,6 @@ export const DEMO_USERS = [
   ['amal', 'رئيسة اللجنة', 'الأستاذة أمل الشهري'],
   ['zahra', 'مديرة المدرسة', 'الأستاذة زهراء الشهراني'],
   ['noha', 'عضوة اللجنة', 'الأستاذة نهى الزهراني'],
-  ['ghazwa', 'معلمة', 'الأستاذة غزوة العتيبي'],
+  ['ghazwa', 'معلمة', 'الأستاذة غزوا العتيبي'],
 ];
 export function resetDemo() { store.del(KEY); store.del('tahseel-demo-session'); }
