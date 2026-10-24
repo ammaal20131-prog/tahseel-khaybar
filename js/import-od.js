@@ -76,7 +76,8 @@ export async function ingestImport({ read = true } = {}) {
       const real = h.startsWith('89504e47') ? 'png' : h.startsWith('ffd8ff') ? 'jpg' : h.startsWith('25504446') ? 'pdf' : h.startsWith('52494646') ? 'webp' : null;
       const ext = (name.match(/\.([^.]+)$/)?.[1] || '').toLowerCase();
       const fixed = real && ['jpg', 'jpeg', 'png', 'webp', 'pdf'].includes(ext) && !(real === 'jpg' && ext === 'jpeg') && real !== ext ? name.replace(/\.[^.]+$/, '.' + real) : name;
-      const file = new File([bytes], fixed);
+      const MIME = { pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', doc: 'application/msword', xls: 'application/vnd.ms-excel', ppt: 'application/vnd.ms-powerpoint', csv: 'text/csv', txt: 'text/plain' };
+      const file = new File([bytes], fixed, { type: MIME[(fixed.match(/\.([^.]+)$/)?.[1] || '').toLowerCase()] || '' });
       try {
         const hash = await sha256(file);
         if (seen.has(hash)) { skipped.push(rel + ' (موجود في الموقع)'); continue; }
