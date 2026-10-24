@@ -86,7 +86,10 @@ export async function ingestImport({ read = true } = {}) {
           requirementId: pickRequirement(reqs || [], cat.key, teacher.id, name), hash,
         });
         seen.add(hash);
-        if (read) { try { await analyzeFile(row); } catch (e) { /* تُقرأ لاحقاً من صفحة الملف */ } }
+        if (read) {
+          try { await analyzeFile(row); }
+          catch (e) { await sb.rpc('review_file', { p_file: row.id, p_decision: 'reopen', p_note: 'مستورد من OneDrive — لم تتم القراءة الآلية' }).then(() => {}, () => {}); }
+        }
         added.push(`${teacher.full_name} / ${cat.title} / ${name}`);
       } catch (e) { failed.push(`${rel}: ${e.message}`); }
     }
