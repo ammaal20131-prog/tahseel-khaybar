@@ -18,6 +18,16 @@ export const App = {
 };
 
 const must = ({ data, error }) => { if (error) throw error; return data; };
+// جلب كل الصفوف على دفعات (حد Supabase الافتراضي 1000 صف)
+async function fetchAll(make, size = 1000) {
+  const out = [];
+  for (let from = 0; ; from += size) {
+    const { data, error } = await make().range(from, from + size - 1);
+    if (error) throw error;
+    out.push(...data);
+    if (data.length < size) return out;
+  }
+}
 
 // ---------------- الدخول ----------------
 export async function login(username, password) {
@@ -83,8 +93,56 @@ export async function fn(name, body) {
 
 // ---------------- البيانات ----------------
 export const q = {
-  stats: async () => must(await sb.rpc('dashboard_stats')),
-  progress: async () => must(await sb.from('teacher_progress').select('*').order('full_name')),
+  // تُحسب الإحصاءات في المتصفح من استعلامات خفيفة بدل دالة dashboard_stats الثقيلة (كانت تتجاوز مهلة الخادم)
+  stats: async () => {
+    const [rs, files, an, profs, subs] = await Promise.all([
+      q.reqStatusRaw(),
+      fetchAll(() => sb.from('files').select('id, status, category_key, teacher_id')),
+      fetchAll(() => sb.from('file_analyses').select('file_id').is('error', null)),
+      fetchAll(() => sb.from('profiles').select('id, is_teacher, active')),
+      sb.from('subjects').select('id', { count: 'exact', head: true }),
+    ]);
+    const cnt = (arr, f) => arr.filter(f).length;
+    const byT = {};
+    rs.forEach((r) => { const t = (byT[r.teacher_id] ||= { req: 0, miss: 0 }); t.req++; if (r.state === 'missing') t.miss++; });
+    return {
+      teachers: cnt(profs, (p) => p.is_teacher && p.active),
+      subjects: subs.count || 0,
+      files: files.length,
+      analyzed: new Set(an.map((a) => a.file_id)).size,
+      complete: cnt(files, (f) => f.status === 'approved'),
+      incomplete: cnt(files, (f) => ['needs_completion', 'failed'].includes(f.status)),
+      to_review: cnt(files, (f) => ['read_ok', 'needs_review'].includes(f.status)),
+      req_total: rs.length,
+      req_submitted: cnt(rs, (r) => r.state !== 'missing'),
+      req_complete: cnt(rs, (r) => r.state === 'complete'),
+      teachers_committed: Object.values(byT).filter((t) => t.req > 0 && t.miss === 0).length,
+      teachers_with_reqs: Object.values(byT).filter((t) => t.req > 0).length,
+      by_category: [...App.categories].sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0)).map((c) => ({
+        key: c.key, title: c.title, sort: c.sort,
+        required: cnt(rs, (r) => r.category_key === c.key),
+        submitted: cnt(rs, (r) => r.category_key === c.key && r.state !== 'missing'),
+        complete: cnt(rs, (r) => r.category_key === c.key && r.state === 'complete'),
+        files: cnt(files, (f) => f.category_key === c.key),
+      })),
+    };
+  },
+  reqStatusRaw: async () => fetchAll(() => sb.from('requirement_status').select('teacher_id, requirement_id, category_key, state')),
+  progress: async () => {
+    const [profs, rs, files] = await Promise.all([
+      fetchAll(() => sb.from('profiles').select('id, full_name, username, active, last_login_at, last_upload_at, role, is_teacher')),
+      q.reqStatusRaw(),
+      fetchAll(() => sb.from('files').select('teacher_id, status')),
+    ]);
+    return profs.filter((p) => p.is_teacher).map((p) => {
+      const r = rs.filter((x) => x.teacher_id === p.id), f = files.filter((x) => x.teacher_id === p.id);
+      const required = r.length, submitted = r.filter((x) => x.state !== 'missing').length, complete = r.filter((x) => x.state === 'complete').length;
+      return { teacher_id: p.id, full_name: p.full_name, username: p.username, active: p.active, last_login_at: p.last_login_at, last_upload_at: p.last_upload_at, role: p.role,
+        required, submitted, complete, missing: required - submitted, returned: r.filter((x) => x.state === 'incomplete').length,
+        files: f.length, to_review: f.filter((x) => ['read_ok', 'needs_review'].includes(x.status)).length,
+        submit_pct: required ? Math.round((100 * submitted) / required) : 0, complete_pct: required ? Math.round((100 * complete) / required) : 0 };
+    }).sort((a, b) => a.full_name.localeCompare(b.full_name, 'ar'));
+  },
   reqStatus: async (teacherId) => {
     let qq = sb.from('requirement_status').select('*');
     if (teacherId) qq = qq.eq('teacher_id', teacherId);
