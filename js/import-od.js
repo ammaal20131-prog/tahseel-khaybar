@@ -71,7 +71,12 @@ export async function ingestImport({ read = true } = {}) {
       const cat = catBySort[sortNo];
       const name = parts[parts.length - 1];
       if (!teacher || !cat) { skipped.push(rel + ' (مجلد غير معروف)'); continue; }
-      const file = new File([bytes], name);
+      // بعض الصور محفوظة بامتداد غير صحيح (PNG باسم .jpg) — نصحح الامتداد حسب محتوى الملف
+      const h = [...new Uint8Array(bytes.slice(0, 4))].map((x) => x.toString(16).padStart(2, '0')).join('');
+      const real = h.startsWith('89504e47') ? 'png' : h.startsWith('ffd8ff') ? 'jpg' : h.startsWith('25504446') ? 'pdf' : h.startsWith('52494646') ? 'webp' : null;
+      const ext = (name.match(/\.([^.]+)$/)?.[1] || '').toLowerCase();
+      const fixed = real && ['jpg', 'jpeg', 'png', 'webp', 'pdf'].includes(ext) && !(real === 'jpg' && ext === 'jpeg') && real !== ext ? name.replace(/\.[^.]+$/, '.' + real) : name;
+      const file = new File([bytes], fixed);
       try {
         const hash = await sha256(file);
         if (seen.has(hash)) { skipped.push(rel + ' (موجود في الموقع)'); continue; }
