@@ -52,7 +52,7 @@ export async function ingestImport({ read = true } = {}) {
   const catBySort = Object.fromEntries(App.categories.filter((c) => c.per_teacher).map((c) => [String(c.sort), c]));
   const { data: reqs } = await sb.from('requirements').select('id,category_key,teacher_id,title,active,sort');
   const existing = await q.files({ limit: 10000 });
-  const seen = new Set(existing.map((f) => `${f.teacher_id}|${f.sha256}`));
+  const seen = new Set(existing.map((f) => f.sha256)); // ملف مطابق موجود في الموقع (لأي معلمة) لا يُستورد مرة ثانية
   const added = [], skipped = [], failed = [];
   const done = [];
   for (const up of plan.uploads) {
@@ -74,12 +74,12 @@ export async function ingestImport({ read = true } = {}) {
       const file = new File([bytes], name);
       try {
         const hash = await sha256(file);
-        if (seen.has(`${teacher.id}|${hash}`)) { skipped.push(rel + ' (موجود)'); continue; }
+        if (seen.has(hash)) { skipped.push(rel + ' (موجود في الموقع)'); continue; }
         const row = await uploadOne({
           file, category: cat.key, teacherId: teacher.id, folderPath: parts.slice(3, -1).join('/'),
           requirementId: pickRequirement(reqs || [], cat.key, teacher.id, name), hash,
         });
-        seen.add(`${teacher.id}|${hash}`);
+        seen.add(hash);
         if (read) { try { await analyzeFile(row); } catch (e) { /* تُقرأ لاحقاً من صفحة الملف */ } }
         added.push(`${teacher.full_name} / ${cat.title} / ${name}`);
       } catch (e) { failed.push(`${rel}: ${e.message}`); }
