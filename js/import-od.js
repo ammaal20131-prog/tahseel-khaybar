@@ -8,6 +8,8 @@ import { uploadOne, analyzeFile, sha256 } from './upload.js';
 
 const BUNDLES = 12;
 const PLAN = 'general/_sync/import-plan.json';
+const IGNORE = 'general/_sync/import-ignore.json'; // ملفات OneDrive التي ثبت أنها موجودة في الموقع (لا تُعاد في كل مزامنة)
+async function readIgnore() { try { const { data } = await sb.storage.from('files').download(IGNORE); return data ? JSON.parse(await data.text()) : []; } catch (e) { return []; } }
 const norm = (s) => String(s || '').normalize('NFKC').replace(/[‎‏⁦-⁩‪-‮]/g, '').replace(/\s+/g, ' ').trim();
 const clean = (s) => String(s || '').replace(/[‎‏⁦-⁩‪-‮]/g, '').replace(/[\\:*?"<>|#%]/g, '-').replace(/\s+/g, ' ').trim();
 
@@ -23,7 +25,7 @@ export async function prepareImport({ hours = 6 } = {}) {
     if (error) throw error;
     uploads.push({ path, url: data.signedUrl });
   }
-  const plan = { created: new Date().toISOString(), manifestUrl: man.url, teachers, uploads };
+  const plan = { created: new Date().toISOString(), manifestUrl: man.url, teachers, uploads, ignore: await readIgnore() };
   const { error } = await sb.storage.from('files').upload(PLAN, new Blob([JSON.stringify(plan)], { type: 'text/plain' }), { upsert: true, contentType: 'text/plain' });
   if (error) throw error;
   const { data: s, error: e2 } = await sb.storage.from('files').createSignedUrl(PLAN, hours * 3600);
@@ -95,5 +97,7 @@ export async function ingestImport({ read = true } = {}) {
     }
   }
   if (done.length) await sb.storage.from('files').remove(done);
+  const ign = new Set([...(await readIgnore()), ...skipped.filter((x) => x.endsWith('(موجود في الموقع)')).map((x) => x.replace(/ \(موجود في الموقع\)$/, ''))]);
+  await sb.storage.from('files').upload(IGNORE, new Blob([JSON.stringify([...ign])], { type: 'text/plain' }), { upsert: true, contentType: 'text/plain' }).catch(() => {});
   return { added: added.length, addedList: added, skipped: skipped.length, skippedList: skipped.slice(0, 30), failed };
 }

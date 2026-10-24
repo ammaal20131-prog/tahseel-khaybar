@@ -6,7 +6,7 @@ const enc = (s) => encodeURIComponent(s.replace(/'/g, "''"));
 const norm = (s) => String(s || '').normalize('NFKC').replace(/[‎‏⁦-⁩‪-‮]/g, '').replace(/\s+/g, ' ').trim();
 const plan = await (await fetch(PLAN_URL)).json();
 const man = await (await fetch(plan.manifestUrl)).json();
-const known = new Set(man.items.map((i) => norm(i.path)));
+const known = new Set([...man.items.map((i) => norm(i.path)), ...(plan.ignore || []).map(norm)]);
 const me = await (await fetch('/_api/SP.UserProfiles.PeopleManager/GetMyProperties?$select=PersonalUrl', { headers: H })).json();
 const pu = new URL(me.PersonalUrl).pathname.replace(/\/$/, '');
 const rootRel = pu + '/Documents/' + man.root;
