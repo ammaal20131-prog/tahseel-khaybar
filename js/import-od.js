@@ -87,7 +87,7 @@ export async function ingestImport({ read = true } = {}) {
         });
         seen.add(hash);
         if (read) {
-          try { await analyzeFile(row); }
+          try { const res = await analyzeFile(row); if (res && res.ok === false) throw new Error(res.reason || 'تعذرت القراءة'); }
           catch (e) { await sb.rpc('review_file', { p_file: row.id, p_decision: 'reopen', p_note: 'مستورد من OneDrive — لم تتم القراءة الآلية' }).then(() => {}, () => {}); }
         }
         added.push(`${teacher.full_name} / ${cat.title} / ${name}`);
