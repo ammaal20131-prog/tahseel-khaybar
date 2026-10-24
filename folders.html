@@ -80,6 +80,13 @@ details[open] .ini{background:var(--k1);color:#fff}
 .note{margin:0;font-size:.86rem;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.chev{transition:none}}
 
+.wk{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;gap:10px}
+.wk h2{margin:0;font-family:var(--display);font-size:1.02rem}
+.wkb{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.wkl{display:grid;gap:2px;text-decoration:none;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px;border-inline-start:4px solid var(--k1)}
+.wkl.gd{border-inline-start-color:var(--k5)}
+.wkl b{font-size:.95rem}.wkl span{font-size:.8rem;color:var(--muted)}
+.wkl:hover{border-color:var(--k1)}.wkl:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 /* refined layout */
 header .in{text-align:center;justify-items:center;gap:16px}
 .brand{flex-direction:column;gap:8px;border-bottom:0;padding-bottom:0}
@@ -113,7 +120,8 @@ summary{padding:14px 16px}
   <ol class="how"><li><b>١</b><span>افتحي اسمك</span></li><li><b>٢</b><span>اختاري القسم</span></li><li><b>٣</b><span>اضغطي «تحميل»</span></li></ol>
 </div></header>
 <main class="in g">
-  <div class="bar"><p class="count" id="count">20 معلمة</p><a class="plan" href="https://asrgirls-my.sharepoint.com/:f:/g/personal/t97254394_asrg_moe_gov_sa/IgCHM6qvudv8ToUt1XJuSR32ATIX3PEbb56gNyz6Bk6Sua0" target="_blank" rel="noopener">ملف الخطة التعليمية الأسبوعية</a></div>
+  <div class="bar"><p class="count" id="count">20 معلمة</p></div>
+  <section class="wk" aria-labelledby="wk"><h2 id="wk">الخطة التعليمية الأسبوعية</h2><div class="wkb"><a class="wkl od" href="https://asrgirls-my.sharepoint.com/:f:/g/personal/t97254394_asrg_moe_gov_sa/IgCHM6qvudv8ToUt1XJuSR32ATIX3PEbb56gNyz6Bk6Sua0" target="_blank" rel="noopener"><b>ون درايف</b><span>ملف الخطة في مجلدات المعلمات</span></a><a class="wkl gd" href="https://drive.google.com/drive/folders/1S6ZAJLXydhUmw6MNaE1AwOh_o4mHlIp-" target="_blank" rel="noopener"><b>قوقل درايف</b><span>رابط الخطة الأصلي</span></a></div></section>
   <ul class="list" id="list">
     <li class="row" data-name="أحلام الشهراني">
       <details>
