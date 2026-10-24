@@ -455,3 +455,21 @@ td.actions { white-space: nowrap; text-align: end; }
   a { color: #000; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ---------- التعبئة السريعة ---------- */
+.qf-sum { margin-bottom: 16px; }
+.qf-od { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); font-size: .9rem; color: var(--muted); }
+.qf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.qf-card { position: relative; overflow: hidden; display: grid; gap: 10px; align-content: start; }
+.qf-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--qk, var(--primary)); }
+.qf-k1 { --qk: var(--primary); } .qf-k3 { --qk: var(--info); } .qf-k4 { --qk: var(--violet); } .qf-k5 { --qk: var(--warn); } .qf-k6 { --qk: var(--bad); } .qf-k7 { --qk: var(--ok); } .qf-k9 { --qk: var(--gold); }
+.qf-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.qf-top h3 { margin: 0; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+.qf-reqs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.qf-reqs li { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 10px; background: var(--surface-2); border: 1px solid var(--line-2); border-radius: var(--radius-sm); }
+.qf-rt { flex: 1; min-width: 0; font-weight: 600; font-size: .9rem; }
+.qf-foot { display: flex; flex-wrap: wrap; gap: 14px; font-size: .85rem; padding-top: 4px; }
+.qf-foot a { display: inline-flex; align-items: center; gap: 5px; color: var(--primary); text-decoration: none; }
+.qf-foot a:hover { text-decoration: underline; }
+.qf-plan { margin-top: 16px; }
+.qf-pl { display: flex; flex-wrap: wrap; gap: 8px; }

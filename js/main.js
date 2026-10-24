@@ -12,6 +12,7 @@ const ROUTES = [
   ['folder/:cat/:teacher', 'folder'],
   ['file/:id', 'file'],
   ['tasks', 'tasks'],
+  ['quick', 'quick'],
   ['teachers', 'teachers', 'staff'],
   ['teacher/:id', 'teacher', 'staff'],
   ['review', 'review', 'staff'],
@@ -47,6 +48,7 @@ function navItems() {
   const staff = App.isStaff, admin = App.isAdmin;
   const items = [
     ['', 'layout-dashboard', 'الصفحة الرئيسية'],
+    ['quick', 'zap', 'التعبئة السريعة'],
     ['folders', 'folder-open', 'المجلدات'],
   ];
   if (p.is_teacher) items.push(['tasks', 'list-checks', 'متطلباتي']);

@@ -127,7 +127,7 @@ async function teacherDashboard(view, stats, files, analyses) {
         <div class="ring" style="--p:${p}"><div><b>${p}٪</b><small>نسبة الرفع</small></div></div>
         <div><h3 style="margin:0">أهلاً ${esc(App.profile.full_name)}</h3>
           <div class="muted" style="font-size:.88rem">رفعتِ ${fmtNum(sub)} من ${fmtNum(total)} متطلباً، واعتُمد منها ${fmtNum(done)}.</div>
-          <a class="btn sm primary" href="#/tasks" style="margin-top:10px">${icon('list-checks')} متطلباتي</a></div>
+          <div class="row" style="margin-top:10px;gap:8px"><a class="btn sm primary" href="#/quick">${icon('zap')} التعبئة السريعة</a><a class="btn sm" href="#/tasks">${icon('list-checks')} متطلباتي</a></div></div>
       </div>
       ${kpi(fmtNum(stats.files), 'ملفاتي المرفوعة', 'files', 'info', '#/folders')}
       ${kpi(fmtNum(todo.length), 'متطلبات لم تكتمل', 'file-warning', todo.length ? 'bad' : '', '#/tasks')}
