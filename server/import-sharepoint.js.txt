@@ -1,0 +1,44 @@
+// يُشغَّل داخل صفحة OneDrive (asrgirls-my.sharepoint.com) — ضعي رابط الخطة في PLAN_URL
+// يبحث في مجلدات المعلمات عن الملفات غير الموجودة في الموقع، ويرفعها للموقع على دفعات (لا يحذف ولا يعدّل شيئاً في OneDrive)
+const PLAN_URL = '__PLAN_URL__';
+const H = { Accept: 'application/json;odata=nometadata' };
+const enc = (s) => encodeURIComponent(s.replace(/'/g, "''"));
+const norm = (s) => String(s || '').normalize('NFKC').replace(/[‎‏⁦-⁩‪-‮]/g, '').replace(/\s+/g, ' ').trim();
+const plan = await (await fetch(PLAN_URL)).json();
+const man = await (await fetch(plan.manifestUrl)).json();
+const known = new Set(man.items.map((i) => norm(i.path)));
+const me = await (await fetch('/_api/SP.UserProfiles.PeopleManager/GetMyProperties?$select=PersonalUrl', { headers: H })).json();
+const pu = new URL(me.PersonalUrl).pathname.replace(/\/$/, '');
+const rootRel = pu + '/Documents/' + man.root;
+const teachers = new Set(plan.teachers.map(norm));
+const found = [];
+const walk = async (p, rel) => {
+  const f = await (await fetch(pu + "/_api/web/GetFolderByServerRelativeUrl('" + enc(p) + "')?$expand=Folders,Files&$select=Folders/Name,Files/Name,Files/Length,Files/ServerRelativeUrl", { headers: H })).json();
+  for (const x of f.Files || []) if (!known.has(norm(rel + '/' + x.Name)) && !/^~\$/.test(x.Name)) found.push({ rel: rel + '/' + x.Name, url: x.ServerRelativeUrl, size: +x.Length });
+  for (const d of f.Folders || []) if (d.Name !== 'Forms') await walk(p + '/' + d.Name, rel + '/' + d.Name);
+};
+const top = await (await fetch(pu + "/_api/web/GetFolderByServerRelativeUrl('" + enc(rootRel + '/مجلدات المعلمات') + "')/Folders?$select=Name", { headers: H })).json();
+for (const t of top.value || []) if (teachers.has(norm(t.Name))) await walk(rootRel + '/مجلدات المعلمات/' + t.Name, 'مجلدات المعلمات/' + t.Name);
+const MAX = 20e6; let k = 0, cur = [], size = 0; const sent = [], errors = [];
+const flush = async () => {
+  if (!cur.length) return;
+  if (k >= plan.uploads.length) { errors.push('دفعات كثيرة؛ الباقي في التشغيل القادم'); cur = []; return; }
+  const hdr = new TextEncoder().encode(JSON.stringify(cur.map((x) => [x.rel, x.ab.byteLength])));
+  const len = new Uint8Array(4); new DataView(len.buffer).setUint32(0, hdr.length);
+  const fd = new FormData(); fd.append('cacheControl', '3600'); fd.append('', new Blob([len, hdr, ...cur.map((x) => x.ab)], { type: 'application/pdf' }));
+  const r = await fetch(plan.uploads[k].url, { method: 'PUT', body: fd });
+  if (r.ok) sent.push(...cur.map((x) => x.rel)); else errors.push('رفع دفعة ' + k + ': ' + r.status);
+  k++; cur = []; size = 0;
+};
+for (const f of found) {
+  if (f.size > MAX) { errors.push(f.rel + ': أكبر من 20MB'); continue; }
+  try {
+    const r = await fetch(f.url.split('/').map(encodeURIComponent).join('/'));
+    if (!r.ok) throw new Error('تنزيل ' + r.status);
+    const ab = await r.arrayBuffer();
+    if (size + ab.byteLength > MAX) await flush();
+    cur.push({ rel: f.rel, ab }); size += ab.byteLength;
+  } catch (e) { errors.push(f.rel + ': ' + e.message); }
+}
+await flush();
+JSON.stringify({ found: found.length, sent: sent.length, bundles: k, errors });
