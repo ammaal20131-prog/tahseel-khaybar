@@ -93,6 +93,7 @@ td.hw{color:var(--ink);font-size:14px}
 .note strong{font-family:var(--f-display);font-weight:600;font-size:13px;display:block;color:var(--accent-text)}
 .toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:999px;font-size:14px;z-index:20}
 footer{color:var(--muted);font-size:12px;text-align:center;padding-block:0 24px}
+.credit{margin:10px 0 0;text-align:center;font-size:11px;color:var(--muted)}
 /* print-friendly view */
 body.printmode .controls,body.printmode #admin,body.printmode .noprint{display:none}
 body.printmode .tablebox{border-color:#999}
@@ -300,10 +301,10 @@ function render(){
     h+='</tbody></table></div>';
   }
 
-  h+='<div class="signrow"><div class="sign"><span>مديرة المدرسة</span><b>'+esc(d.principal||"")+'</b><div class="sigbox">'+(d.signature?'<img src="'+esc(d.signature)+'" alt="توقيع مديرة المدرسة">':'<em>التوقيع</em>')+'</div></div><div class="stampbox">'+(d.stamp?'<img src="'+esc(d.stamp)+'" alt="ختم المدرسة">':'<em>الختم</em>')+'</div></div></section>';
+  h+='<div class="signrow"><div class="sign"><span>مديرة المدرسة</span><b>'+esc(d.principal||"")+'</b><div class="sigbox">'+(d.signature?'<img src="'+esc(d.signature)+'" alt="توقيع مديرة المدرسة">':'<em>التوقيع</em>')+'</div></div><div class="stampbox">'+(d.stamp?'<img src="'+esc(d.stamp)+'" alt="ختم المدرسة">':'<em>الختم</em>')+'</div></div><p class="credit">إعداد وتصميم: أ. أمل الشهري</p></section>';
   h+='<div class="meta"><span>آخر تحديث: '+esc(fmtDate(d.updated))+'</span>'+(canEdit&&!adminOpen?'<button class="btn noprint" data-act="admin">إدارة الخطط</button>':'')+'</div>';
   if(adminOpen)h+=adminHTML(d,w);
-  h+='</div></main><footer class="wrap">'+esc(d.school)+' · الخطة الأسبوعية الموحدة</footer>';
+  h+='</div></main><footer class="wrap">'+esc(d.school)+' · الخطة الأسبوعية الموحدة<br>إعداد وتصميم: أ. أمل الشهري</footer>';
   document.getElementById("app").innerHTML=h;
   document.body.classList.toggle("printmode",printMode);
 }
