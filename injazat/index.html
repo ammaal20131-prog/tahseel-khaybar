@@ -20,6 +20,7 @@
   --c-proj:#3F7F33; --c-proj-soft:#E8F3E4;
   --c-inno:#B23A68; --c-inno-soft:#FBE7EF;
   --c-rec:#1F7396; --c-rec-soft:#E2F0F6;
+  --c-tch:#9A5B12; --c-tch-soft:#FBEFDD;
   --focus:#7D5A93;
   --f-display:"Lalezar","Readex Pro",Tahoma,sans-serif;
   --f-head:"Readex Pro","IBM Plex Sans Arabic",Tahoma,sans-serif;
@@ -31,14 +32,14 @@
   --plum:#3A2F40; --plum-ink:#F7F1FA; --gold:#E2CD6E; --gold-ink:#2A210A;
   --chip:#33293A; --chip-ink:#EADFF0; --school:#FFFFFF; --track:#33293A;
   --c-init:#ACA9F4; --c-init-soft:#25233F; --c-proj:#9AD388; --c-proj-soft:#1E2E1A;
-  --c-inno:#F28DB4; --c-inno-soft:#3A1E2A; --c-rec:#7FC8E6; --c-rec-soft:#15303B; --focus:#C7A6DD; color-scheme:dark}}
+  --c-inno:#F28DB4; --c-inno-soft:#3A1E2A; --c-rec:#7FC8E6; --c-rec-soft:#15303B; --c-tch:#F0BE73; --c-tch-soft:#33250F; --focus:#C7A6DD; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#1B1620; --surface:#251E2B; --ink:#F1EAF4; --muted:#B3A6BB; --line:#382E3F;
   --band-a:#5E4870; --band-b:#7D6690; --band-ink:#FFFFFF;
   --plum:#3A2F40; --plum-ink:#F7F1FA; --gold:#E2CD6E; --gold-ink:#2A210A;
   --chip:#33293A; --chip-ink:#EADFF0; --school:#FFFFFF; --track:#33293A;
   --c-init:#ACA9F4; --c-init-soft:#25233F; --c-proj:#9AD388; --c-proj-soft:#1E2E1A;
-  --c-inno:#F28DB4; --c-inno-soft:#3A1E2A; --c-rec:#7FC8E6; --c-rec-soft:#15303B; --focus:#C7A6DD; color-scheme:dark}
+  --c-inno:#F28DB4; --c-inno-soft:#3A1E2A; --c-rec:#7FC8E6; --c-rec-soft:#15303B; --c-tch:#F0BE73; --c-tch-soft:#33250F; --focus:#C7A6DD; color-scheme:dark}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.75}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
 .wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -98,6 +99,7 @@ td .rl{display:block;color:var(--muted);font-size:.82rem}
 .c-proj{--c:var(--c-proj);--soft:var(--c-proj-soft)}
 .c-inno{--c:var(--c-inno);--soft:var(--c-inno-soft)}
 .c-rec{--c:var(--c-rec);--soft:var(--c-rec-soft)}
+.c-tch{--c:var(--c-tch);--soft:var(--c-tch-soft)}
 .tasks{margin:0;padding-inline-start:18px;font-size:.9rem}
 .tasks li{margin-block:2px}
 
@@ -267,9 +269,10 @@ const CATS0={
   init:{name:"المبادرات",one:"مبادرة",cls:"c-init"},
   proj:{name:"المشاريع التعليمية",one:"مشروع تعليمي",cls:"c-proj"},
   inno:{name:"الابتكارات",one:"ابتكار",cls:"c-inno"},
-  rec:{name:"سجلات المدرسة الرقمية",one:"سجل رقمي",cls:"c-rec"}
+  rec:{name:"سجلات المدرسة الرقمية",one:"سجل رقمي",cls:"c-rec"},
+  tch:{name:"ملفات إنجاز المعلمات",one:"ملف إنجاز",cls:"c-tch"}
 };
-const ORDER=["inno","init","proj","rec"];
+const ORDER=["inno","init","proj","rec","tch"];
 const CATS=Object.fromEntries(ORDER.map(k=>[k,CATS0[k]]));
 const FIELDS=["المهارات الرقمية","الوعي والمواطنة","العلوم","الدراسات الإسلامية والوقف","التطوير الإداري"];
 const T={
@@ -346,7 +349,7 @@ const W=[
   d:"سجل رقمي يوثّق برامج الشراكة المجتمعية للمدرسة والجهات المشاركة فيها في مكان واحد، تعدّه مسؤولة الشراكة.",
   ind:[["","توثيق رقمي"],["","مرجع واحد للشراكات"]],
   task:"توثيق برامج الشراكة المجتمعية وتحديث سجلها"},
- {c:"rec",f:4,by:"amal",t:"ملف المعلمة الرقمي",aud:"الإدارة والمشرفات وأولياء الأمور",u:"https://ammaal20131-prog.github.io/My-project/",
+ {c:"tch",f:4,by:"amal",t:"ملف المعلمة الرقمي",aud:"الإدارة والمشرفات وأولياء الأمور",u:"https://ammaal20131-prog.github.io/My-project/",
   d:"منصة تجمع ملف المعلمة المهني في مكان واحد: الدرجات، ومجلدات الإنجاز، والشروحات، والشراكة المجتمعية، والخطط، والشهادات، وتحليل النتائج.",
   ind:[["٨","أقسام"],["","مجلدات الإنجاز"],["","تحليل النتائج"]],
   task:"بناء ملفها الرقمي وتحديثه"},
@@ -430,9 +433,11 @@ const ICON={
  proj:`<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><g class="bob"><path d="M50 8c14 12 18 30 14 48H36C32 38 36 20 50 8z" fill="currentColor" fill-opacity=".25"/><circle cx="50" cy="34" r="7"/><path d="M36 50l-12 14h14M64 50l12 14H62"/><path class="flame" d="M42 64q8 22 16 0" fill="var(--peach)" stroke="var(--peach)"/></g></svg>`,
  inno:`<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><g class="glow"><path d="M50 4v8M14 20l6 6M86 20l-6 6M4 52h8M96 52h-8"/></g><path d="M50 22a24 24 0 0 0-14 43c3 3 4 7 4 11h20c0-4 1-8 4-11a24 24 0 0 0-14-43z" fill="currentColor" fill-opacity=".25"/><path d="M40 86h20M44 95h12"/><path class="tw" d="M50 36v20M42 46h16" stroke-width="5"/></svg>`, rec:`<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><g class="bob"><path d="M10 26a6 6 0 0 1 6-6h22l8 9h38a6 6 0 0 1 6 6v43a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6z" fill="currentColor" fill-opacity=".25"/><path d="M30 50h40M30 64h26"/></g><path class="tw" d="M80 8l2.5 5.5 6 .8-4.5 4 1.2 6-5.2-3-5.2 3 1.2-6-4.5-4 6-.8z" fill="currentColor" stroke-width="2"/></svg>`,
 
+ tch:`<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><g class="bob"><path d="M10 28a6 6 0 0 1 6-6h22l8 9h38a6 6 0 0 1 6 6v41a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6z"/><path d="M34 58l10 9 20-20"/></g></svg>`,
+ rec:`<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><g class="bob"><path d="M10 28a6 6 0 0 1 6-6h22l8 9h38a6 6 0 0 1 6 6v41a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6z"/><path d="M34 58l10 9 20-20"/></g></svg>`,
  end:`<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><g class="bob"><path d="M50 86S12 62 12 36a19 19 0 0 1 38-6 19 19 0 0 1 38 6c0 26-38 50-38 50z" fill="currentColor" fill-opacity=".25"/></g><path class="tw" d="M82 10l2 5 5 1-4 3 1 5-4-2-4 2 1-5-4-3 5-1z" fill="currentColor" stroke-width="2"/><path class="tw" style="animation-delay:.7s" d="M16 78l2 5 5 1-4 3 1 5-4-2-4 2 1-5-4-3 5-1z" fill="currentColor" stroke-width="2"/></svg>`
 };
-const DEF={inno:"أدوات ومنصات رقمية جديدة تحل مشكلة قائمة أو تقدّم طريقة غير تقليدية.",init:"أنشطة توعوية ومجتمعية لها أهداف وفئات مستهدفة ومدة.",proj:"منتجات تعليمية مرتبطة بمادة أو حصة نشاط تنفذها الطالبات.",rec:"سجلات وملفات إلكترونية توثّق عمل المدرسة في مكان واحد بدل الورق."};
+const DEF={inno:"أدوات ومنصات رقمية جديدة تحل مشكلة قائمة أو تقدّم طريقة غير تقليدية.",init:"أنشطة توعوية ومجتمعية لها أهداف وفئات مستهدفة ومدة.",proj:"منتجات تعليمية مرتبطة بمادة أو حصة نشاط تنفذها الطالبات.",rec:"سجلات وملفات إلكترونية توثّق عمل المدرسة في مكان واحد بدل الورق.",tch:"ملفات المعلمات الرقمية التي تجمع إنجازهن المهني وخططهن وشواهدهن في مكان واحد."};
 const NUMW=["","واحد","اثنان","ثلاثة","أربعة","خمسة","ستة","سبعة","ثمانية","تسعة","عشرة"];
 const S=[{ico:"star",k:"مرحباً بكم",t:"معرض إنجازات المدرسة",p:`${ar(W.length)} عملاً موثقاً: `+ORDER.map(k=>`${ar(W.filter(w=>inCat(w,k)).length)} ${CATS[k].name}`).join("، ")+".",ms:5500}];
 ORDER.forEach(k=>{
