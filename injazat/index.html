@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ملف إنجازات خيبر الجنوب</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Readex+Pro:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>
+/* Layout: lavender header with sticky section tabs; summary figures, two distribution bars, team & tasks table, then filterable work files with indicators and QR */
+:root{
+  --bg:#F6F2F8; --surface:#FFFFFF; --ink:#2E2335; --muted:#6F6378; --line:#E7DDEB;
+  --band-a:#A88BB8; --band-b:#D3BFDC; --band-ink:#FFFFFF;
+  --plum:#4F4054; --plum-ink:#FFFFFF; --gold:#E7D37C; --gold-ink:#3A2E10;
+  --chip:#EEE6F1; --chip-ink:#4F4054; --school:#2E1F38; --track:#EDE6F0;
+  --c-init:#4F4BB0; --c-init-soft:#ECEBFA;
+  --c-proj:#3F7F33; --c-proj-soft:#E8F3E4;
+  --c-inno:#B23A68; --c-inno-soft:#FBE7EF;
+  --c-rec:#1F7396; --c-rec-soft:#E2F0F6;
+  --focus:#7D5A93;
+  --f-display:"Lalezar","Readex Pro",Tahoma,sans-serif;
+  --f-head:"Readex Pro","IBM Plex Sans Arabic",Tahoma,sans-serif;
+  --f-body:"IBM Plex Sans Arabic",Tahoma,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1B1620; --surface:#251E2B; --ink:#F1EAF4; --muted:#B3A6BB; --line:#382E3F;
+  --band-a:#5E4870; --band-b:#7D6690; --band-ink:#FFFFFF;
+  --plum:#3A2F40; --plum-ink:#F7F1FA; --gold:#E2CD6E; --gold-ink:#2A210A;
+  --chip:#33293A; --chip-ink:#EADFF0; --school:#FFFFFF; --track:#33293A;
+  --c-init:#ACA9F4; --c-init-soft:#25233F; --c-proj:#9AD388; --c-proj-soft:#1E2E1A;
+  --c-inno:#F28DB4; --c-inno-soft:#3A1E2A; --c-rec:#7FC8E6; --c-rec-soft:#15303B; --focus:#C7A6DD; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1B1620; --surface:#251E2B; --ink:#F1EAF4; --muted:#B3A6BB; --line:#382E3F;
+  --band-a:#5E4870; --band-b:#7D6690; --band-ink:#FFFFFF;
+  --plum:#3A2F40; --plum-ink:#F7F1FA; --gold:#E2CD6E; --gold-ink:#2A210A;
+  --chip:#33293A; --chip-ink:#EADFF0; --school:#FFFFFF; --track:#33293A;
+  --c-init:#ACA9F4; --c-init-soft:#25233F; --c-proj:#9AD388; --c-proj-soft:#1E2E1A;
+  --c-inno:#F28DB4; --c-inno-soft:#3A1E2A; --c-rec:#7FC8E6; --c-rec-soft:#15303B; --focus:#C7A6DD; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.75}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+h1,h2,h3{text-wrap:balance}
+
+.band{background:linear-gradient(110deg,var(--band-a),var(--band-b));color:var(--band-ink);border-radius:0 0 48px 48px}
+.band .wrap{padding-block:30px 34px;display:grid;gap:14px}
+.brand{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.moe{background:#FFFFFF;border-radius:18px;padding:8px 12px;box-shadow:0 6px 18px rgba(46,35,53,.18)}
+.moe img{height:54px;width:auto;display:block}
+.school{font-family:var(--f-head);font-weight:700;font-size:clamp(1.15rem,3.6vw,1.45rem);line-height:1.4;color:var(--school)}
+.school small{display:block;font-family:var(--f-body);font-weight:500;font-size:.8rem;color:var(--band-ink)}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(2.2rem,7vw,3.4rem);line-height:1.25;margin:0}
+.lead{margin:0;max-width:64ch;opacity:.95}
+.visit{display:flex;flex-wrap:wrap;gap:8px}
+.visit span{background:rgba(255,255,255,.22);border-radius:999px;padding:4px 14px;font-size:.88rem;font-weight:500}
+
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);margin-top:14px}
+.tabs .wrap{display:flex;gap:8px;overflow-x:auto;padding-block:10px;scrollbar-width:none}
+.tabs a{flex:none;text-decoration:none;color:var(--chip-ink);background:var(--chip);border-radius:999px;padding:8px 18px;font-weight:600;font-size:.92rem}
+.tabs a.on{background:var(--gold);color:var(--gold-ink)}
+
+section{padding-block:22px 8px;scroll-margin-top:70px}
+.sh{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.sh h2{font-family:var(--f-head);font-weight:700;font-size:1.4rem;margin:0}
+.sh p{margin:0;color:var(--muted);font-size:.92rem}
+
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:16px 18px;display:grid;gap:2px}
+.kpi b{font-family:var(--f-display);font-weight:400;font-size:2.6rem;line-height:1.1;color:var(--c-init);font-variant-numeric:tabular-nums}
+.kpi span{font-weight:600}
+.kpi small{color:var(--muted);font-size:.82rem;line-height:1.5}
+.kpi.dark{background:var(--plum);color:var(--plum-ink);border-color:var(--plum)}
+.kpi.dark b{color:var(--gold)}.kpi.dark small{color:var(--plum-ink);opacity:.8}
+
+.dists{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.dist{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px;display:grid;gap:12px;min-width:0}
+.dist h3{margin:0;font-family:var(--f-head);font-size:1.05rem}
+.row{display:grid;grid-template-columns:minmax(0,9.5rem) minmax(0,1fr) 2rem;gap:10px;align-items:center;font-size:.92rem}
+.row .tr{height:12px;background:var(--track);border-radius:999px;overflow:hidden}
+.row .tr i{display:block;height:100%;border-radius:999px;background:var(--c,var(--plum))}
+.row b{font-variant-numeric:tabular-nums;text-align:end}
+.scale{display:grid;grid-template-columns:minmax(0,9.5rem) minmax(0,1fr) 2rem;gap:10px;font-size:.75rem;color:var(--muted)}
+.scale div{display:flex;justify-content:space-between}
+
+.tablebox{background:var(--surface);border:1px solid var(--line);border-radius:22px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th,td{text-align:start;padding:14px 16px;vertical-align:top;border-bottom:1px solid var(--line)}
+tr:last-child td{border-bottom:0}
+th{font-family:var(--f-head);font-size:.85rem;color:var(--muted);font-weight:500;background:var(--chip)}
+td .nm{font-weight:700;font-family:var(--f-head)}
+td .rl{display:block;color:var(--muted);font-size:.82rem}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:.8rem;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--soft);color:var(--c);text-decoration:none}
+.c-init{--c:var(--c-init);--soft:var(--c-init-soft)}
+.c-proj{--c:var(--c-proj);--soft:var(--c-proj-soft)}
+.c-inno{--c:var(--c-inno);--soft:var(--c-inno-soft)}
+.c-rec{--c:var(--c-rec);--soft:var(--c-rec-soft)}
+.tasks{margin:0;padding-inline-start:18px;font-size:.9rem}
+.tasks li{margin-block:2px}
+
+.filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.filters button{font:inherit;border:2px solid transparent;border-radius:22px;padding:14px 16px;cursor:pointer;background:var(--soft);color:var(--ink);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;text-align:start}
+.filters button b{font-family:var(--f-display);font-weight:400;font-size:2rem;line-height:1;color:var(--c);font-variant-numeric:tabular-nums}
+.filters button span{font-family:var(--f-head);font-weight:700;font-size:.98rem;line-height:1.4}
+.filters button i{font-style:normal;color:var(--c);font-size:1.1rem;transition:transform .25s}
+.filters button[aria-expanded="true"]{border-color:var(--c);background:var(--surface)}
+.filters button[aria-expanded="true"] i{transform:rotate(180deg)}
+.file{scroll-margin-top:72px}
+.hint{background:var(--surface);border:1px dashed var(--line);border-radius:22px;padding:22px;text-align:center;color:var(--muted)}
+@media (max-width:820px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.filters{grid-template-columns:minmax(0,1fr)}}
+.files{display:grid;gap:14px}
+.cnt{display:inline-grid;place-items:center;min-width:1.6em;height:1.6em;margin-inline-start:6px;border-radius:999px;background:var(--surface);font-size:.8rem;font-variant-numeric:tabular-nums}
+@media (max-width:640px){table{min-width:0}thead{display:none}tbody tr{display:grid;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}tbody tr:last-child{border-bottom:0}td{padding:0;border:0}}
+.file{background:var(--surface);border:1px solid var(--line);border-radius:26px;padding:20px;display:grid;grid-template-columns:minmax(0,1fr);gap:18px;border-inline-start:6px solid var(--c)}
+.file .main{display:grid;gap:10px;min-width:0}
+.file:has(.side){grid-template-columns:minmax(0,1fr) auto}
+.file .hd{display:flex;gap:12px;align-items:flex-start}
+.num{flex:none;width:40px;height:40px;clip-path:polygon(50% 0,61% 13%,78% 7%,80% 24%,96% 30%,88% 45%,100% 58%,84% 66%,86% 84%,68% 82%,60% 98%,47% 87%,33% 98%,25% 82%,8% 84%,12% 66%,0 55%,13% 44%,5% 28%,21% 24%,23% 7%,40% 13%);background:var(--gold);color:var(--gold-ink);display:grid;place-items:center;font-family:var(--f-head);font-weight:700;font-variant-numeric:tabular-nums}
+.file h3{margin:0;font-family:var(--f-head);font-size:1.15rem;line-height:1.45}
+.meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.86rem;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:600}
+.file p{margin:0;max-width:72ch}
+.ind{display:flex;flex-wrap:wrap;gap:8px}
+.ind span{background:var(--soft);color:var(--ink);border-radius:12px;padding:6px 12px;font-size:.86rem}
+.ind span b{color:var(--c);font-family:var(--f-head);font-variant-numeric:tabular-nums;margin-inline-end:4px}
+.pics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:520px}
+.pics img{border-radius:12px;aspect-ratio:16/9;object-fit:cover;width:100%}
+.side{display:grid;gap:8px;justify-items:center;align-content:start;width:132px}
+.qr{width:120px;height:120px;background:#FFFFFF;border-radius:14px;padding:8px;display:grid;place-items:center}
+.qr img,.qr canvas{width:104px!important;height:104px!important}
+.side small{font-size:.75rem;color:var(--muted);text-align:center;line-height:1.4}
+.open{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:8px 16px;font-weight:600;font-size:.88rem;text-decoration:none;background:var(--plum);color:var(--plum-ink);white-space:nowrap}
+.noqr{width:120px;height:120px;border-radius:14px;border:2px dashed var(--line);display:grid;place-items:center;text-align:center;font-size:.78rem;color:var(--muted);padding:8px}
+footer{color:var(--muted);font-size:.85rem;padding-block:34px 40px;text-align:center}
+
+@media (max-width:560px){.kpis{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:820px){.dists{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:560px){.file,.file:has(.side){grid-template-columns:minmax(0,1fr)}.side{width:auto;grid-template-columns:auto 1fr;justify-items:start;align-items:center}.side small{text-align:start}.row,.scale{grid-template-columns:minmax(0,7rem) minmax(0,1fr) 1.6rem}}
+/* ---------- auto show ---------- */
+.show{margin-top:22px;background:var(--plum);color:var(--plum-ink);border-radius:30px;padding:16px 18px 18px;display:grid;gap:12px;position:relative;overflow:hidden}
+.show:fullscreen{border-radius:0;align-content:center;padding:4vh 6vw}
+.bars{display:flex;gap:4px;direction:rtl}
+.bars button{flex:1;height:5px;border:0;padding:0;border-radius:3px;background:color-mix(in srgb,var(--plum-ink) 22%,transparent);cursor:pointer;position:relative;overflow:hidden}
+.bars button i{position:absolute;inset:0;background:var(--gold);transform-origin:right;transform:scaleX(0)}
+.bars button.done i{transform:scaleX(1)}
+.stage{display:grid}
+.slide{grid-area:1/1;display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px 22px;align-items:center;opacity:0;visibility:hidden;transition:opacity .6s,visibility .6s;padding-block:10px 4px}
+.slide.on{opacity:1;visibility:visible}
+.slide .ico{width:clamp(90px,16vw,150px);aspect-ratio:1;max-width:100%;border-radius:50%;background:color-mix(in srgb,var(--plum-ink) 8%,transparent);display:grid;place-items:center;color:var(--gold)}
+.slide .ico svg{width:62%;height:62%;overflow:visible}
+.slide .txt{display:grid;gap:8px;min-width:0}
+.slide .k{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.85rem}
+.slide .k b{background:var(--gold);color:var(--gold-ink);border-radius:999px;padding:2px 12px}
+.slide .k span{opacity:.8}
+.slide h2{margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(1.6rem,5vw,2.6rem);line-height:1.3;text-wrap:balance}
+.slide p{margin:0;max-width:62ch;opacity:.92;line-height:1.8}
+.slide .who{font-size:.88rem;opacity:.8}
+.slide .go{justify-self:start;background:var(--gold);color:var(--gold-ink);border-radius:999px;padding:8px 18px;font-weight:600;text-decoration:none}
+.slide .gal{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slide .gal img{border-radius:14px;aspect-ratio:16/9;object-fit:cover;width:100%}
+.slide.on .txt>*{animation:rise .7s both}
+.slide.on .txt>*:nth-child(2){animation-delay:.12s}.slide.on .txt>*:nth-child(3){animation-delay:.24s}.slide.on .txt>*:nth-child(4){animation-delay:.36s}.slide.on .txt>*:nth-child(5){animation-delay:.48s}
+.slide.on .ico{animation:pop .7s both}
+.slide.on .gal img{animation:kb 9s ease-out both}
+.slide.on .gal img:nth-child(2){animation-delay:.2s}.slide.on .gal img:nth-child(3){animation-delay:.4s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}}
+@keyframes pop{from{opacity:0;transform:scale(.6) rotate(-20deg)}}
+@keyframes kb{from{transform:scale(1.12)}to{transform:scale(1)}}
+.spin{animation:spin 14s linear infinite;transform-origin:50% 50%}
+.bob{animation:bob 2.4s ease-in-out infinite}
+.wavef{animation:flag 1.6s ease-in-out infinite;transform-origin:30% 50%}
+.glow{animation:glow 1.8s ease-in-out infinite}
+.flame{animation:flame .35s ease-in-out infinite alternate;transform-origin:50% 0}
+.tw{animation:tw 2s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bob{50%{transform:translateY(-8%)}}
+@keyframes flag{50%{transform:skewY(-8deg) scaleX(.92)}}
+@keyframes glow{50%{opacity:.25}}
+@keyframes flame{to{transform:scaleY(1.35)}}
+@keyframes tw{50%{opacity:.2;transform:scale(.6)}}
+.ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ctl button{width:42px;height:42px;border-radius:50%;border:1px solid color-mix(in srgb,var(--plum-ink) 35%,transparent);background:transparent;color:var(--plum-ink);cursor:pointer;display:grid;place-items:center;font-size:1rem}
+.ctl button.main{background:var(--gold);color:var(--gold-ink);border-color:var(--gold)}
+.ctl .count{margin-inline-start:auto;font-size:.85rem;opacity:.8;font-variant-numeric:tabular-nums}
+.ctl .auto{font-size:.8rem;opacity:.75}
+.wave2{height:8px;background:radial-gradient(circle at 6px -2px,transparent 5px,var(--gold) 5.5px,var(--gold) 7px,transparent 7.5px) 0 0/12px 8px repeat-x;opacity:.9}
+@media (max-width:640px){.slide{grid-template-columns:minmax(0,1fr)}.slide .ico{width:84px}}
+@media (prefers-reduced-motion:reduce){.spin,.bob,.wavef,.glow,.flame,.tw,.slide.on .txt>*,.slide.on .ico,.slide.on .gal img{animation:none}}
+/* overlay mode */
+[hidden]{display:none!important}
+.show{position:fixed;inset:0;z-index:30;margin:0;border-radius:0;overflow-y:auto;align-content:center;
+  padding:max(18px,env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) max(18px,env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px))}
+.show .inner{max-width:980px;width:100%;margin:0 auto;display:grid;gap:14px}
+.show .shead{display:flex;align-items:center;gap:12px}
+.show .shead img{height:40px;background:#FFFFFF;border-radius:10px;padding:4px 8px}
+.show .shead strong{font-family:var(--f-head);font-size:1.05rem;flex:1}
+.show .x{width:42px;height:42px;border-radius:50%;border:1px solid color-mix(in srgb,var(--plum-ink) 35%,transparent);background:transparent;color:var(--plum-ink);cursor:pointer;font-size:1.1rem}
+.slide h2{color:var(--plum-ink)}
+.play-btn{justify-self:start;display:inline-flex;align-items:center;gap:10px;border:0;border-radius:999px;background:var(--plum);color:var(--plum-ink);font:inherit;font-weight:700;font-family:var(--f-head);padding:12px 24px;cursor:pointer;box-shadow:0 8px 20px rgba(46,35,53,.25)}
+.play-btn i{font-style:normal;width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--gold-ink);display:grid;place-items:center;font-size:.8rem}
+.tabs a.show-tab{background:var(--plum);color:var(--plum-ink)}
+</style>
+</head>
+<body>
+
+
+<div dir="rtl" lang="ar">
+<header class="band"><div class="wrap">
+  <div class="brand"><span class="moe"><img src="img/moe.png" alt="شعار وزارة التعليم"></span><div class="school"><small>المملكة العربية السعودية · وزارة التعليم</small>متوسطة خيبر الجنوب (بنات)</div></div>
+  <h1>ملف الإنجازات</h1>
+  <p class="lead">أهلاً بالفريق الزائر. يعرض هذا الملف ابتكارات المدرسة ومبادراتها ومشاريعها التعليمية وسجلاتها الرقمية، وفريق العمل والمهام المنفذة، مع رابط ورمز QR لفتح كل عمل مباشرة.</p>
+  <div class="visit"><span>الفصل الدراسي الأول ١٤٤٨هـ</span><span>مديرة المدرسة: أ. زهراء مفلح</span></div>
+  <button type="button" class="play-btn" data-open-show><i>▶</i>شغّلي وضع المعرض</button>
+</div></header>
+
+<nav class="tabs" aria-label="أقسام الملف"><div class="wrap">
+  <a href="#summary" class="on">الملخص</a><a href="#works">ملفات الأعمال</a><a href="#team">فريق العمل والمهام</a><a href="#show" class="show-tab" data-open-show>▶ وضع المعرض</a>
+</div></nav>
+
+<main class="wrap">
+  <section id="summary">
+    <div class="sh"><h2>ملخص الإنجازات</h2><p>محسوب من الأعمال الموثقة في هذا الملف</p></div>
+    <div class="kpis" id="kpis"></div>
+    <div class="dists">
+      <div class="dist"><h3>حسب التصنيف</h3><div id="byCat"></div></div>
+      <div class="dist"><h3>حسب المجال</h3><div id="byField"></div></div>
+    </div>
+  </section>
+
+  <section id="works">
+    <div class="sh"><h2>ملفات الأعمال</h2><p>اضغطي على القسم لعرض أعماله</p></div>
+    <div class="filters" id="filters"></div>
+    <div class="files" id="files"></div>
+  </section>
+
+  <section id="team">
+    <div class="sh"><h2>فريق العمل والمهام</h2><p>المنفذات وما أُسند لكل منهن</p></div>
+    <div class="tablebox"><table>
+      <thead><tr><th>المنفذة</th><th>الأعمال</th><th>المهام المنفذة</th></tr></thead>
+      <tbody id="teamBody"></tbody>
+    </table></div>
+  </section>
+</main>
+<footer class="wrap">متوسطة خيبر الجنوب (بنات) · ملف الإنجازات للزيارة · ١٤٤٨هـ</footer>
+<section class="show" id="show" hidden aria-label="وضع المعرض">
+  <div class="inner">
+    <div class="shead"><img src="img/moe.png" alt="شعار وزارة التعليم"><strong>متوسطة خيبر الجنوب · معرض الإنجازات</strong><button type="button" class="x" id="sClose" aria-label="إغلاق المعرض">✕</button></div>
+    <div class="bars" id="bars"></div>
+    <div class="stage" id="stage" aria-live="polite"></div>
+    <div class="wave2" aria-hidden="true"></div>
+    <div class="ctl">
+      <button type="button" id="sPrev" aria-label="السابق">→</button>
+      <button type="button" class="main" id="sPlay" aria-label="إيقاف مؤقت">❚❚</button>
+      <button type="button" id="sNext" aria-label="التالي">←</button>
+      <button type="button" id="sFull" aria-label="ملء الشاشة">⛶</button>
+      <span class="auto" id="sAuto">يعرض تلقائياً</span>
+      <span class="count" id="sCount"></span>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const CATS0={
+  init:{name:"المبادرات",one:"مبادرة",cls:"c-init"},
+  proj:{name:"المشاريع التعليمية",one:"مشروع تعليمي",cls:"c-proj"},
+  inno:{name:"الابتكارات",one:"ابتكار",cls:"c-inno"},
+  rec:{name:"سجلات المدرسة الرقمية",one:"سجل رقمي",cls:"c-rec"}
+};
+const ORDER=["inno","init","proj","rec"];
+const CATS=Object.fromEntries(ORDER.map(k=>[k,CATS0[k]]));
+const FIELDS=["المهارات الرقمية","الوعي والمواطنة","العلوم","الدراسات الإسلامية والوقف","التطوير الإداري"];
+const T={
+  amal:{n:"أ. أمل الشهري",r:"معلمة · مسؤولة الشراكة المجتمعية · عضوة لجنة التحصيل الدراسي"},
+  ahlam:{n:"أ. أحلام راشد",r:"معلمة المهارات الرقمية"},
+  sara:{n:"أ. سارة عبيد الشهراني",r:"معلمة الدراسات الإسلامية"},
+  noha:{n:"أ. نهى الزهراني",r:"معلمة العلوم"},
+  admin:{n:"إدارة المدرسة",r:"بإشراف المديرة أ. زهراء مفلح"},
+  munira:{n:"أ. منيرة الشهراني",r:"معلمة"}
+};
+const W=[
+ {c:"init",f:1,by:"ahlam",t:"وعي رقمي… فكر وأمن",aud:"الطالبات والمعلمات والإداريات وأولياء الأمور",u:"https://dreamahlam4549-max.github.io/-ahlam-rashed-wa3y-raqmi/",
+  d:"مبادرة على مستوى مجتمع المدرسة في ثلاثة محاور: الوعي الرقمي، والوعي الفكري، والأمن الرقمي، بخطة زمنية من أربع مراحل وقياس أثر قبلي وبعدي.",
+  ind:[["١٦","نشاطاً"],["١٢","أسبوعاً"],["٤","فئات مستهدفة"],["","قياس قبلي وبعدي"]],
+  task:"تخطيط المبادرة وتنفيذ ورشها ومتابعة قياس أثرها"},
+ {c:"init",f:1,by:"amal",t:"درع الوطن",aud:"الطالبات وأولياء الأمور والإدارة والمعلمات",u:"https://actschool28-cyber.github.io/dir3-alwatan/#home",
+  d:"مبادرة وطنية تفعيلاً للمادة (٣٤) من النظام الأساسي للحكم، يشارك فيها مجتمع المدرسة برسائل وبطاقات ورسوم وتسجيلات صوتية لتقدير الجنود البواسل.",
+  ind:[["٢٠٠","مشاركة مستهدفة"],["٤","طرق مشاركة"],["","استبانة وشهادة"]],
+  task:"تصميم منصة المبادرة وتنفيذها مع الطالبات والأسر"},
+ {c:"init",f:3,by:"admin",t:"أثرٌ يبقى (وقف المدرسة)",aud:"مجتمع المدرسة",u:null,pics:["img/chairs.jpg","img/quran.jpg","img/carpet.jpg"],
+  d:"مبادرة وقفية باسم متوسطة خيبر الجنوب لتوفير احتياجات دائمة يبقى أثرها وأجرها مع كل من ينتفع بها.",
+  ind:[["٣","أصناف وقفية"],["","كراسٍ"],["","مصاحف"],["","سجاد المصلى"]],
+  task:"إطلاق الوقف وتوفير احتياجات المصلى والقاعات"},
+ {c:"init",f:3,by:"sara",t:"أفق القراءة: المكتبة الإلكترونية الشاملة",aud:"طالبات المرحلة المتوسطة وأولياء الأمور",u:"library.pdf",ul:"افتح المكتبة",
+  d:"مكتبة رقمية للدراسات الإسلامية تضم المقررات المعتمدة ومصادر التفسير والسيرة وقصص الصحابة، ولها خطة تشغيلية وأهداف استراتيجية.",
+  ind:[["٥","أهداف تشغيلية"],["٣","صفوف دراسية"],["","طبعة ١٤٤٧هـ"]],
+  task:"إعداد المكتبة وخطتها التشغيلية وإرشادات الاستفادة منها"},
+ {c:"init",f:0,by:"ahlam",t:"متمكنة رقمياً: خبيرة الحاسب",aud:"الصف الأول المتوسط",u:"https://dreamahlam4549-max.github.io/khabeerat-alhasib/",
+  d:"الأسبوع الأول من مبادرة متمكنة رقمياً: تنظيم الملفات والمجلدات بتحدٍّ جماعي وأدوار للفريق وتقويم ختامي.",
+  ind:[["٤٥","دقيقة"],["٥","أدوار للفريق"],["","بطاقة خروج"]],
+  task:"إعداد الدرس التفاعلي وإدارة التحدي الجماعي"},
+ {c:"init",f:1,by:"amal",t:"مبادرة المتميزات: شهادات الشكر والتقدير",aud:"الطالبات المتميزات وأولياء الأمور",u:"https://ammaal20131-prog.github.io/1Shahadat/",
+  d:"صفحة تكرّم الطالبات المتميزات بشهادات شكر وتقدير، تختار فيها الطالبة نوع الشهادة ثم فصلها لتجد شهادتها.",
+  ind:[["٢","نوعا شهادة: المشاريع والتفوق"],["","حسب الفصل"],["","١٤٤٨هـ"]],
+  task:"إعداد شهادات المتميزات وإتاحتها إلكترونياً"},
+ {c:"proj",f:0,by:"amal",t:"تحدي إنترنت الأشياء",aud:"الطالبات في حصص النشاط",u:"https://ammaal20131-prog.github.io/iot-challenge/?v=3",
+  d:"برنامج لحصص النشاط عن الحساسات وتطبيقات المنزل الذكي وتصميم المشاريع التقنية بالمحاكاة، ويُنفذ جماعياً عبر البروجكتر.",
+  ind:[["","حصص النشاط"],["","تنفيذ جماعي"],["","محاكاة وتحديات"]],
+  task:"تصميم البرنامج وتنفيذه في حصص النشاط"},
+ {c:"proj",f:0,by:"ahlam",t:"تاجرة المستقبل",aud:"الصف الثالث المتوسط",u:"https://dreamahlam4549-max.github.io/tajerat-almostaqbal/",
+  d:"لعبة تعليمية في التجارة الإلكترونية تبدأ برصيد افتراضي وتمر بمواقف تجارية وأمنية، وتكافئ القرارات الصحيحة بالنقاط والشارات.",
+  ind:[["٤","مراحل"],["٤","شارات"],["١٬٠٠٠","ريال رصيد افتراضي"]],
+  task:"تصميم اللعبة وربطها بوحدة التجارة الإلكترونية"},
+ {c:"proj",f:0,by:"amal",t:"الشروط المتداخلة في بايثون",aud:"الصف الثاني المتوسط",u:"https://ammaal20131-prog.github.io/My-project/nested-if/",
+  d:"درس تفاعلي في البرمجة بأنشطة متدرجة وتحديات، ينتهي بشهادة إتمام تُرسل نتيجتها للمعلمة.",
+  ind:[["١٥","نشاطاً"],["٥","تحديات"],["","شهادة إتمام"]],
+  task:"إعداد الدرس وتصحيح النتائج المرسلة"},
+ {c:"proj",f:0,by:"amal",t:"متجر الكب كيك: قواعد البيانات",aud:"الطالبات",u:"https://ammaal20131-prog.github.io/cupcake-store/",u2:"https://ammaal20131-prog.github.io/cupcake-store/guide.pdf",
+  d:"مشروع تبني فيه كل طالبة قاعدة بيانات لمتجر من جوالها بواجهة تشبه Access، مع دليل مصوّر وورقة عمل تُرسل للمعلمة.",
+  ind:[["٥","مراحل Access"],["","دليل مصوّر"],["","ورقة عمل"]],
+  task:"تصميم التطبيق والدليل ومتابعة تسليم الطالبات"},
+ {c:"proj",f:2,by:["munira","noha"],t:"مجلة شرارة اكتشاف",aud:"طالبات المدرسة ومجتمعها",u:"https://zesty-piroshki-37d5a4.netlify.app/",ul:"تصفح المجلة",
+  d:"مجلة علمية تفاعلية أصدرتها إدارة متوسطة خيبر الجنوب، تُتصفح صفحة بعد صفحة وتقدّم موضوعات علمية بأسلوب جذاب.",
+  ind:[["","مجلة علمية"],["","تفاعلية"]],
+  task:"إعداد محتوى المجلة وإخراجها"},
+ {c:"inno",f:2,by:"noha",t:"مختبر قوانين نيوتن الغامر (3D)",aud:"الصف الأول المتوسط · العلوم",u:"https://nohaalzahrin.netlify.app",
+  d:"مختبر افتراضي ثلاثي الأبعاد يحاكي قوانين نيوتن الثلاثة، تغيّر فيه الطالبة القوة والكتلة والاحتكاك وتشاهد النتائج مباشرة.",
+  ind:[["٣","قوانين"],["٣","تحديات"],["","اختبار وشهادة"]],
+  task:"تصميم المحاكاة وربطها بوحدة القوة والحركة"},
+ {c:"inno",f:4,by:"amal",t:"نموذج إشعارات غياب الطالبات",aud:"الإدارة وأولياء الأمور",u:"https://ammaal20131-prog.github.io/ghiyab/",
+  d:"إشعار غياب إلكتروني يوقّعه ولي الأمر ويعيده، فتُحفظ الاستجابة تلقائياً في مجلد المدرسة على OneDrive بدل الورق.",
+  ind:[["٥","خطوات"],["","توقيع إلكتروني"],["","أرشفة تلقائية"]],
+  task:"بناء النموذج وأتمتة حفظ الاستجابات"},
+ {c:"inno",also:["rec"],f:4,by:"amal",t:"منصة ملف لجنة التحصيل الدراسي",aud:"المعلمات ولجنة التحصيل",u:"https://ammaal20131-prog.github.io/tahseel-khaybar/",
+  d:"منصة تجمع ملفات التحصيل في مكان واحد، وتقرأ الملفات المرفوعة وتوضح النواقص، وتحسب المتوسطات ونسب الإتقان من ملفات Excel.",
+  ind:[["٦","متطلبات لكل معلمة"],["","تحليل تلقائي"],["","نسبة إنجاز"]],
+  task:"بناء المنصة ومتابعة رفع ملفات المعلمات"},
+ {c:"inno",f:4,by:"amal",t:"صفحة الخطط الأسبوعية الموحدة",aud:"الطالبات وأولياء الأمور والمعلمات",u:"https://ammaal20131-prog.github.io/tahseel-khaybar/weekly-plan/",
+  d:"صفحة واحدة تجمع الخطط الأسبوعية لجميع المعلمات مرتبة حسب الصف والفصل والمادة، فيطّلع ولي الأمر على دروس ابنته ومهامها برابط واحد دون تحميل ملفات، وتُحدَّث أسبوعياً.",
+  ind:[["","رابط واحد لكل الخطط"],["","حسب الصف والفصل والمادة"],["","تحديث أسبوعي"]],
+  task:"بناء الصفحة وتحديث الخطط أسبوعياً"},
+ {c:"rec",f:4,by:"amal",t:"سجل الشراكة المجتمعية",aud:"الإدارة والجهات الشريكة",u:"https://ammaal20131-prog.github.io/tahseel-khaybar/sharaka.html",
+  d:"سجل رقمي يوثّق برامج الشراكة المجتمعية للمدرسة والجهات المشاركة فيها في مكان واحد، تعدّه مسؤولة الشراكة.",
+  ind:[["","توثيق رقمي"],["","مرجع واحد للشراكات"]],
+  task:"توثيق برامج الشراكة المجتمعية وتحديث سجلها"},
+ {c:"rec",f:4,by:"amal",t:"ملف المعلمة الرقمي",aud:"الإدارة والمشرفات وأولياء الأمور",u:"https://ammaal20131-prog.github.io/My-project/",
+  d:"منصة تجمع ملف المعلمة المهني في مكان واحد: الدرجات، ومجلدات الإنجاز، والشروحات، والشراكة المجتمعية، والخطط، والشهادات، وتحليل النتائج.",
+  ind:[["٨","أقسام"],["","مجلدات الإنجاز"],["","تحليل النتائج"]],
+  task:"بناء ملفها الرقمي وتحديثه"}
+];
+W.sort((a,b)=>ORDER.indexOf(a.c)-ORDER.indexOf(b.c));
+W.forEach((w,i)=>w.i=i);
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const ar=n=>n.toLocaleString("ar-SA");
+const inCat=(w,k)=>w.c===k||(w.also||[]).includes(k);
+
+/* summary */
+const byOf=w=>[].concat(w.by);
+const people=new Set(W.flatMap(byOf).filter(k=>k!=="admin"));
+const linked=W.filter(w=>w.u&&/^https?:/.test(w.u)).length;
+$("#kpis").innerHTML=[
+  ["dark",W.length,"عملاً موثقاً","ابتكارات ومبادرات ومشاريع وسجلات"],
+  ["",FIELDS.length,"مجالات","من الرقمي إلى الإداري"],
+  ["",linked,"أعمال رقمية","تُفتح برابط مباشر"]
+].map(([c,n,l,s])=>`<div class="kpi ${c}"><b>${ar(n)}</b><span>${l}</span><small>${s}</small></div>`).join("");
+function bars(rows){
+  const max=Math.max(...rows.map(r=>r.n)),top=Math.ceil(max/2)*2;
+  return rows.map(r=>`<div class="row ${r.cls||""}"><span>${r.l}</span><div class="tr"><i style="width:${r.n/top*100}%"></i></div><b>${ar(r.n)}</b></div>`).join("")+
+   `<div class="scale"><span></span><div><span>٠</span><span>${ar(top/2)}</span><span>${ar(top)}</span></div><span></span></div>`;
+}
+$("#byCat").innerHTML=bars(Object.entries(CATS).map(([k,c])=>({l:c.name,n:W.filter(w=>inCat(w,k)).length,cls:c.cls})));
+$("#byField").innerHTML=bars(FIELDS.map((f,k)=>({l:f,n:W.filter(w=>w.f===k).length})).sort((a,b)=>b.n-a.n));
+
+/* team */
+$("#teamBody").innerHTML=Object.entries(T).map(([k,p])=>{
+  const ws=W.filter(w=>byOf(w).includes(k)); if(!ws.length)return "";
+  return `<tr><td><span class="nm">${p.n}</span><span class="rl">${p.r}</span></td>
+   <td><div class="tags">${ws.map(w=>`<a class="tag ${CATS[w.c].cls}" href="#f${w.i}">${esc(w.t)}</a>`).join("")}</div></td>
+   <td><ul class="tasks">${ws.map(w=>`<li>${esc(w.task)}</li>`).join("")}</ul></td></tr>`;
+}).join("");
+
+/* files */
+let filter=null;
+function renderFilters(){
+  $("#filters").innerHTML=Object.entries(CATS).map(([k,c])=>`<button type="button" class="${c.cls}" aria-expanded="${filter===k}" aria-controls="files" data-k="${k}"><b>${ar(W.filter(w=>inCat(w,k)).length)}</b><span>${c.name}</span><i aria-hidden="true">⌄</i></button>`).join("");
+  $("#filters").querySelectorAll("button").forEach(b=>b.onclick=()=>{filter=filter===b.dataset.k?null:b.dataset.k;renderFiles();});
+}
+function renderFiles(){
+  renderFilters();
+  if(!filter){$("#files").innerHTML=`<div class="hint">اضغطي على أي قسم لعرض أعماله</div>`;return;}
+  $("#files").innerHTML=W.filter(w=>inCat(w,filter)).map(w=>{
+    const c=CATS[w.c];
+    const ext=w.u&&/^https?:/.test(w.u);
+    const side=w.u?`${ext?`<div class="qr" data-url="${esc(w.u)}" aria-label="رمز QR لفتح ${esc(w.t)}"></div>`:""}<a class="open" href="${esc(w.u)}" target="_blank" rel="noopener">${w.ul||"افتح العمل"} ↗</a>${w.u2?`<a class="open" href="${esc(w.u2)}" target="_blank" rel="noopener">الدليل المصوّر ↗</a>`:""}${ext?`<small>امسحي الرمز بكاميرا الجوال</small>`:""}`
+      :"";
+    return `<article class="file ${c.cls}" id="f${w.i}">
+      <div class="main">
+        <div class="hd"><div class="num">${ar(w.i+1)}</div><div><h3>${esc(w.t)}</h3><span class="tag">${c.one}${(w.also||[]).map(k=>"، "+CATS[k].one).join("")}، ${FIELDS[w.f]}</span></div></div>
+        <div class="meta"><span>التنفيذ: <b>${byOf(w).map(k=>T[k].n).join(" و")}</b></span><span>المستفيدون: <b>${esc(w.aud)}</b></span></div>
+        <p>${esc(w.d)}</p>
+        <div class="ind">${w.ind.map(([n,l])=>`<span>${n?`<b>${n}</b>`:""}${l}</span>`).join("")}</div>
+        ${w.pics?`<div class="pics">${w.pics.map(p=>`<img src="${p}" alt="من صور وقف المدرسة" loading="lazy">`).join("")}</div>`:""}
+      </div>
+      ${side?`<div class="side">${side}</div>`:""}
+    </article>`;
+  }).join("");
+  if(window.QRCode)document.querySelectorAll(".qr").forEach(el=>{try{new QRCode(el,{text:el.dataset.url,width:208,height:208,colorDark:"#2E2335",colorLight:"#FFFFFF",correctLevel:QRCode.CorrectLevel.M});}catch(e){}});
+  else document.querySelectorAll(".qr").forEach(el=>{const s=el.nextElementSibling&&el.parentElement.querySelector("small");if(s)s.remove();el.remove();});
+}
+renderFiles();
+
+document.addEventListener("click",e=>{const a=e.target.closest('a.tag[href^="#f"]');if(!a)return;e.preventDefault();
+  const w=W[+a.getAttribute("href").slice(2)];filter=w.c;renderFiles();const el=document.getElementById("f"+w.i);el&&el.scrollIntoView({behavior:"smooth",block:"start"});});
+/* tabs highlight */
+const tabs=[...document.querySelectorAll(".tabs a")];
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)tabs.forEach(t=>t.classList.toggle("on",t.getAttribute("href")==="#"+e.target.id));}),{rootMargin:"-40% 0px -55% 0px"});
+document.querySelectorAll("section").forEach(s=>io.observe(s));
+</script>
+<script>
+(function(){
+const ICON={
+ star:`<svg viewBox="0 0 100 100"><g class="spin"><polygon fill="currentColor" points="50,4 58,20 76,14 74,32 92,38 80,52 92,66 74,70 76,88 58,82 50,98 42,82 24,88 26,70 8,66 20,52 8,38 26,32 24,14 42,20"/></g><circle cx="50" cy="51" r="20" fill="var(--plum)"/><path class="tw" d="M50 39l3.5 8 8.5.8-6.4 5.6 1.9 8.4-7.5-4.4-7.5 4.4 1.9-8.4-6.4-5.6 8.5-.8z" fill="currentColor"/></svg>`,
+ init:`<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M24 92V10"/><g class="wavef"><path d="M24 14c12-8 24 8 36 0s18-4 22-2v36c-4-2-10-6-22 2s-24-8-36 0z" fill="currentColor" fill-opacity=".25"/></g><path class="tw" d="M74 70l3 6 6 1-4.5 4 1 6-5.5-3-5.5 3 1-6-4.5-4 6-1z" fill="currentColor" stroke-width="2"/></svg>`,
+ proj:`<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><g class="bob"><path d="M50 8c14 12 18 30 14 48H36C32 38 36 20 50 8z" fill="currentColor" fill-opacity=".25"/><circle cx="50" cy="34" r="7"/><path d="M36 50l-12 14h14M64 50l12 14H62"/><path class="flame" d="M42 64q8 22 16 0" fill="var(--peach)" stroke="var(--peach)"/></g></svg>`,
+ inno:`<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><g class="glow"><path d="M50 4v8M14 20l6 6M86 20l-6 6M4 52h8M96 52h-8"/></g><path d="M50 22a24 24 0 0 0-14 43c3 3 4 7 4 11h20c0-4 1-8 4-11a24 24 0 0 0-14-43z" fill="currentColor" fill-opacity=".25"/><path d="M40 86h20M44 95h12"/><path class="tw" d="M50 36v20M42 46h16" stroke-width="5"/></svg>`, rec:`<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><g class="bob"><path d="M10 26a6 6 0 0 1 6-6h22l8 9h38a6 6 0 0 1 6 6v43a6 6 0 0 1-6 6H16a6 6 0 0 1-6-6z" fill="currentColor" fill-opacity=".25"/><path d="M30 50h40M30 64h26"/></g><path class="tw" d="M80 8l2.5 5.5 6 .8-4.5 4 1.2 6-5.2-3-5.2 3 1.2-6-4.5-4 6-.8z" fill="currentColor" stroke-width="2"/></svg>`,
+
+ end:`<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><g class="bob"><path d="M50 86S12 62 12 36a19 19 0 0 1 38-6 19 19 0 0 1 38 6c0 26-38 50-38 50z" fill="currentColor" fill-opacity=".25"/></g><path class="tw" d="M82 10l2 5 5 1-4 3 1 5-4-2-4 2 1-5-4-3 5-1z" fill="currentColor" stroke-width="2"/><path class="tw" style="animation-delay:.7s" d="M16 78l2 5 5 1-4 3 1 5-4-2-4 2 1-5-4-3 5-1z" fill="currentColor" stroke-width="2"/></svg>`
+};
+const DEF={inno:"أدوات ومنصات رقمية جديدة تحل مشكلة قائمة أو تقدّم طريقة غير تقليدية.",init:"أنشطة توعوية ومجتمعية لها أهداف وفئات مستهدفة ومدة.",proj:"منتجات تعليمية مرتبطة بمادة أو حصة نشاط تنفذها الطالبات.",rec:"سجلات وملفات إلكترونية توثّق عمل المدرسة في مكان واحد بدل الورق."};
+const NUMW=["","واحد","اثنان","ثلاثة","أربعة","خمسة","ستة","سبعة","ثمانية","تسعة","عشرة"];
+const S=[{ico:"star",k:"مرحباً بكم",t:"معرض إنجازات المدرسة",p:`${ar(W.length)} عملاً موثقاً: `+ORDER.map(k=>`${ar(W.filter(w=>inCat(w,k)).length)} ${CATS[k].name}`).join("، ")+".",ms:5500}];
+ORDER.forEach(k=>{
+  const ws=W.filter(w=>inCat(w,k));
+  S.push({ico:k,k:`${ar(ws.length)} أعمال`,t:CATS[k].name,p:DEF[k],ms:4000});
+  ws.forEach((w,j)=>S.push({ico:k,w,k2:k,n:j+1,ms:w.pics?10000:9000}));
+});
+S.push({ico:"end",k:"شكراً لكم",t:"نفخر بإبداع منسوباتنا",p:"متوسطة خيبر الجنوب (بنات) · بإشراف مديرة المدرسة أ. زهراء مفلح.",ms:5000});
+const e=s=>esc(s);
+$("#stage").innerHTML=S.map((s,i)=>{
+  if(!s.w)return `<div class="slide"><div class="ico">${ICON[s.ico]}</div><div class="txt"><div class="k"><b>${e(s.k)}</b></div><h2>${e(s.t)}</h2><p>${e(s.p)}</p></div></div>`;
+  const w=s.w,c=CATS[s.k2],who=byOf(w).map(k=>T[k].n).join(" و");
+  const go=w.u?`<a class="go" href="${e(w.u)}" target="_blank" rel="noopener">${w.ul||"افتح العمل"} ↗</a>`:"";
+  const gal=w.pics?`<div class="gal">${w.pics.map(p=>`<img src="${p}" alt="من صور وقف المدرسة">`).join("")}</div>`:"";
+  return `<div class="slide"><div class="ico">${ICON[s.ico]}</div><div class="txt"><div class="k"><b>${c.one} ${ar(s.n)}</b><span>${e(w.aud)}</span></div><h2>${e(w.t)}</h2><p>${e(w.d)}</p><div class="who">إعداد ${e(who)}</div>${go}</div>${gal}</div>`;
+}).join("");
+$("#bars").innerHTML=S.map((s,i)=>`<button type="button" aria-label="الشريحة ${i+1}"><i></i></button>`).join("");
+const slides=[...document.querySelectorAll("#stage .slide")],bars=[...document.querySelectorAll("#bars button")];
+let idx=0,playing=false,open=false,start=0,elapsed=0;
+function show(i){
+  idx=(i+S.length)%S.length; elapsed=0; start=performance.now();
+  slides.forEach((s,k)=>s.classList.toggle("on",k===idx));
+  bars.forEach((b,k)=>{b.classList.toggle("done",k<idx);b.firstChild.style.transform=k<idx?"scaleX(1)":"scaleX(0)";});
+  $("#sCount").textContent=`${ar(idx+1)} / ${ar(S.length)}`;
+}
+function tick(now){
+  if(open&&playing){
+    const t=elapsed+(now-start), d=S[idx].ms;
+    bars[idx].firstChild.style.transform=`scaleX(${Math.min(t/d,1)})`;
+    if(t>=d)show(idx+1);
+  }
+  requestAnimationFrame(tick);
+}
+function setPlay(p){
+  if(p===playing)return;
+  if(!p)elapsed+=performance.now()-start; else start=performance.now();
+  playing=p;
+  $("#sPlay").textContent=p?"❚❚":"▶"; $("#sPlay").setAttribute("aria-label",p?"إيقاف مؤقت":"تشغيل");
+  $("#sAuto").textContent=p?"يعرض تلقائياً":"متوقف، اضغطي ▶ للمتابعة";
+}
+function openShow(){open=true;$("#show").hidden=false;document.documentElement.style.overflow="hidden";show(0);playing=false;setPlay(true);$("#show").focus();}
+function closeShow(){open=false;setPlay(false);$("#show").hidden=true;document.documentElement.style.overflow="";try{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});}catch(err){}}
+document.querySelectorAll("[data-open-show]").forEach(b=>b.addEventListener("click",ev=>{ev.preventDefault();openShow();}));
+$("#sClose").onclick=closeShow;
+$("#sPlay").onclick=()=>setPlay(!playing);
+$("#sNext").onclick=()=>show(idx+1);
+$("#sPrev").onclick=()=>show(idx-1);
+bars.forEach((b,k)=>b.onclick=()=>show(k));
+$("#sFull").onclick=()=>{const el=$("#show");try{(document.fullscreenElement?document.exitFullscreen():el.requestFullscreen()).catch(()=>{});}catch(err){}};
+$("#show").tabIndex=-1;
+document.addEventListener("keydown",ev=>{if(!open)return;if(ev.key==="Escape")closeShow();if(ev.key==="ArrowLeft")show(idx+1);if(ev.key==="ArrowRight")show(idx-1);if(ev.key===" "){ev.preventDefault();setPlay(!playing);}});
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&playing){elapsed+=performance.now()-start;}else if(playing){start=performance.now();}});
+show(0); requestAnimationFrame(tick);
+})();
+</script>
+
+
+</body>
+</html>
