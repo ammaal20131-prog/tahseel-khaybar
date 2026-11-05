@@ -225,10 +225,6 @@ footer{color:var(--muted);font-size:.85rem;padding-block:34px 40px;text-align:ce
   <section id="summary">
     <div class="sh"><h2>ملخص الإنجازات</h2><p>محسوب من الأعمال الموثقة في هذا الملف</p></div>
     <div class="kpis" id="kpis"></div>
-    <div class="dists">
-      <div class="dist"><h3>حسب التصنيف</h3><div id="byCat"></div></div>
-      <div class="dist"><h3>حسب المجال</h3><div id="byField"></div></div>
-    </div>
   </section>
 
   <section id="works">
@@ -375,8 +371,6 @@ function bars(rows){
   return rows.map(r=>`<div class="row ${r.cls||""}"><span>${r.l}</span><div class="tr"><i style="width:${r.n/top*100}%"></i></div><b>${ar(r.n)}</b></div>`).join("")+
    `<div class="scale"><span></span><div><span>٠</span><span>${ar(top/2)}</span><span>${ar(top)}</span></div><span></span></div>`;
 }
-$("#byCat").innerHTML=bars(Object.entries(CATS).map(([k,c])=>({l:c.name,n:W.filter(w=>inCat(w,k)).length,cls:c.cls})));
-$("#byField").innerHTML=bars(FIELDS.map((f,k)=>({l:f,n:W.filter(w=>w.f===k).length})).sort((a,b)=>b.n-a.n));
 
 /* team */
 $("#teamBody").innerHTML=Object.entries(T).map(([k,p])=>{
