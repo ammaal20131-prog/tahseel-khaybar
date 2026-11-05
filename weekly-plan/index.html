@@ -336,6 +336,7 @@ function render(){
   if(adminOpen&&draft)h+='<div class="printhint noprint">تعرضين الآن <b>المسودة</b> كما ستظهر بعد النشر. أولياء الأمور يرون النسخة المعتمدة فقط.</div>';
   if(printMode)h+='<div class="printhint noprint">نسخة الطباعة جاهزة. من قائمة المتصفح اختاري «طباعة»، أو «مشاركة ← طباعة ← حفظ PDF» في الجوال. <button class="btn" data-act="print-off">رجوع للعرض العادي</button></div>';
   h+='<section class="due v2"><div class="due-top"><label for="weeksel">خطة</label><select id="weeksel" aria-label="اختيار الأسبوع">'+opts+'</select></div>'+(w?'<div class="due-range">'+esc(w.range)+'</div>':'')+'<span class="due-badge">'+ar(groups.length)+' مواد، '+ar(nLessons)+' درسًا</span><svg class="wave" viewBox="0 0 400 12" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 Q 10 0 20 6 T 40 6 T 60 6 T 80 6 T 100 6 T 120 6 T 140 6 T 160 6 T 180 6 T 200 6 T 220 6 T 240 6 T 260 6 T 280 6 T 300 6 T 320 6 T 340 6 T 360 6 T 380 6 T 400 6" fill="none" stroke="currentColor" stroke-width="2.4"/></svg></section>';
+  h+='<div class="actions v2 noprint"><button class="tab on" data-act="pdf">تحميل PDF</button><button class="tab" data-act="print">نسخة للطباعة</button><button class="tab" data-act="copy">نسخ للواتساب</button></div>';
   h+='<section class="card v2"><h2>خطة الصف '+esc(gradeTitle(cls))+'</h2><p class="lead">اقرئي المواد بالترتيب: موضوع الدرس، ثم أهداف التعلم، ثم الواجب.</p>';
   if(!groups.length)h+='<div class="empty">لا توجد خطة منشورة لهذا الصف في هذا الأسبوع بعد.</div>';
   groups.forEach(function(g,i){
@@ -347,7 +348,6 @@ function render(){
     g.notes.forEach(function(n){h+='<p class="pnote">ملاحظة لولي الأمر: '+esc(n)+'</p>'});
     h+='</div></article>'});
   h+='<div class="sign2"><div><span>مديرة المدرسة</span><b>'+esc(d.principal||"")+'</b>'+(d.signature?'<img class="sig" src="'+esc(d.signature)+'" alt="توقيع مديرة المدرسة">':'')+'</div>'+(d.stamp?'<img class="stamp" src="'+esc(d.stamp)+'" alt="ختم المدرسة">':'')+'</div></section>';
-  h+='<div class="actions v2 noprint"><button class="tab on" data-act="pdf">تحميل PDF</button><button class="tab" data-act="print">نسخة للطباعة</button><button class="tab" data-act="copy">نسخ للواتساب</button></div>';
   h+='<section class="sheet"><div class="sheet-head"><div class="moe">'+(d.logo?'<img class="logo" src="'+esc(d.logo)+'" alt="شعار وزارة التعليم">':'')+'<div><b>وزارة التعليم</b><span>Ministry of Education</span></div></div><div class="ttl"><h1>خطة التعلم الأسبوعية</h1>'+(cls?'<div class="subtitle">للصف '+esc(gradeTitle(cls))+'</div>':'')+'</div><div class="spacer"></div></div>';
   h+='<div class="info">'+(w?'<div class="ibox">'+icon("cal")+'<span>'+esc(w.range)+'</span></div>':'')+'<div class="ibox">'+icon("book")+'<span>'+groups.length+' مواد</span></div><div class="ibox">'+icon("school")+'<span>'+esc(d.school)+(d.region?'<small>'+esc(d.region)+'</small>':'')+'</span></div></div>';
   if(!groups.length){h+='<div class="empty">لا توجد خطة منشورة لهذا الصف في هذا الأسبوع بعد.</div>'}
