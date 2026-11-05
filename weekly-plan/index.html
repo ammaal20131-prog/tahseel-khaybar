@@ -210,10 +210,12 @@ details summary{cursor:pointer;font-weight:600}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 /* v2 screen view: lavender hero, pill tabs, plum due card, numbered cream steps */
-:root{--lav1:#a98dc0;--lav2:#d9c9e6;--on-lav:#ffffff;--plum:#4f4058;--on-plum:#fffaf0;--sun:#e8d67c;--on-sun:#3b3226;--badge:#f5cb7f;--cream:#fdf9ea;--peach:#fbf1e1;--tab:#efe7f3;--card:#ffffff;--card-edge:#e8d67c;--pg:#f7f4f9;--warnbg:#f9e0de;--warnfg:#8a2b22;--f-hero:"Rubik","Noto Kufi Arabic",Tahoma,sans-serif}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--lav1:#5d4870;--lav2:#7b6390;--on-lav:#fbf7ff;--plum:#2c2333;--on-plum:#fff6e6;--sun:#cbb75e;--on-sun:#221c12;--badge:#d8ad5f;--cream:#2a2618;--peach:#2d2219;--tab:#2a2330;--card:#1d1922;--card-edge:#8f8040;--pg:#141117;--warnbg:#3a1e1c;--warnfg:#f3b0a8}}
-:root[data-theme="dark"]{--lav1:#5d4870;--lav2:#7b6390;--on-lav:#fbf7ff;--plum:#2c2333;--on-plum:#fff6e6;--sun:#cbb75e;--on-sun:#221c12;--badge:#d8ad5f;--cream:#2a2618;--peach:#2d2219;--tab:#2a2330;--card:#1d1922;--card-edge:#8f8040;--pg:#141117;--warnbg:#3a1e1c;--warnfg:#f3b0a8}
+:root{--title:#4f4058;--lav1:#a98dc0;--lav2:#d9c9e6;--on-lav:#ffffff;--plum:#4f4058;--on-plum:#fffaf0;--sun:#e8d67c;--on-sun:#3b3226;--badge:#f5cb7f;--cream:#fdf9ea;--peach:#fbf1e1;--tab:#efe7f3;--card:#ffffff;--card-edge:#e8d67c;--pg:#f7f4f9;--warnbg:#f9e0de;--warnfg:#8a2b22;--f-hero:"Rubik","Noto Kufi Arabic",Tahoma,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--title:#eadcf3;--lav1:#5d4870;--lav2:#7b6390;--on-lav:#fbf7ff;--plum:#2c2333;--on-plum:#fff6e6;--sun:#cbb75e;--on-sun:#221c12;--badge:#d8ad5f;--cream:#2a2618;--peach:#2d2219;--tab:#2a2330;--card:#1d1922;--card-edge:#8f8040;--pg:#141117;--warnbg:#3a1e1c;--warnfg:#f3b0a8}}
+:root[data-theme="dark"]{--title:#eadcf3;--lav1:#5d4870;--lav2:#7b6390;--on-lav:#fbf7ff;--plum:#2c2333;--on-plum:#fff6e6;--sun:#cbb75e;--on-sun:#221c12;--badge:#d8ad5f;--cream:#2a2618;--peach:#2d2219;--tab:#2a2330;--card:#1d1922;--card-edge:#8f8040;--pg:#141117;--warnbg:#3a1e1c;--warnfg:#f3b0a8}
 body{background:var(--pg)}
+.sheet-head{background:linear-gradient(110deg,#8f6fac,#c3acd8)!important;color:#fff!important}
+.card h2,.step h3{color:var(--title)}
 .hero{background:linear-gradient(110deg,var(--lav1),var(--lav2));color:var(--on-lav);border-radius:0 0 40px 40px;padding-block:calc(22px + env(safe-area-inset-top,0px)) 34px}
 .hero h1{font-family:var(--f-hero);font-weight:800;font-size:clamp(34px,9vw,56px);margin:0;line-height:1.15}
 .hero p{margin:8px 0 0;opacity:.85;font-size:15px}
