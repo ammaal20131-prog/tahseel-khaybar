@@ -49,6 +49,13 @@ export default async function quick(view, params, query) {
       </section>`;
     }).join('')}</div>` : `<div class="card">${emptyState('لا توجد متطلبات محددة حالياً', 'list-checks')}</div>`}
 
+    ${links?.partnership ? `<section class="card qf-plan" style="border-color:#A0623A">
+      <div class="card-head"><h3>${icon('handshake')} سجل الشراكة المجتمعية</h3></div>
+      <p class="muted" style="margin:0 0 10px;font-size:.88rem">ملف الشراكة له رابط مستقل: تضيفين فيه التعاون والاجتماعات وترفعين التقارير والشهادات والعقود، وتشاركين رابطه وحده دون بقية ملفك.</p>
+      <div class="qf-pl"><a class="btn primary" href="${esc(links.partnership)}" target="_blank" rel="noopener">${icon('external-link')} فتح سجل الشراكة</a>
+      <button class="btn" data-copy="${esc(links.partnership)}">${icon('copy')} نسخ رابط المشاركة</button></div>
+    </section>` : ''}
+
     <section class="card qf-plan">
       <div class="card-head"><h3>${icon('calendar-range')} الخطة التعليمية الأسبوعية</h3></div>
       <p class="muted" style="margin:0 0 10px;font-size:.88rem">افتحي مجلد خطة مادتك، ثم مجلد الصف، وارفعي خطة الأسبوع.</p>
@@ -60,6 +67,7 @@ export default async function quick(view, params, query) {
     </section>
     <p class="muted" style="font-size:.82rem;margin-top:12px">${icon('info')} الملفات التي ترفعينها في الون درايف تنتقل للموقع تلقائياً في المزامنة (9:52 صباحاً، 1:52 ظهراً، 8:52 مساءً)، والرفع هنا في الموقع يظهر فوراً.</p>`;
 
+  view.querySelector('[data-copy]')?.addEventListener('click', async (e) => { const b = e.currentTarget; try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = 'نُسخ الرابط ✓'; } catch (_) { prompt('انسخي الرابط:', b.dataset.copy); } });
   view.querySelector('[data-pick]')?.addEventListener('change', (e) => { location.hash = '#/quick?t=' + e.target.value; });
   view.querySelectorAll('[data-up]').forEach((b) => b.addEventListener('click', () =>
     openUploadDialog({ category: b.dataset.cat, teacherId: tid, requirementId: b.dataset.up, onDone: () => setTimeout(rerender, 400) })));
