@@ -213,7 +213,7 @@ footer{color:var(--muted);font-size:.85rem;padding-block:34px 40px;text-align:ce
   <div class="brand"><span class="moe"><img src="img/moe.png" alt="شعار وزارة التعليم"></span><div class="school"><small>المملكة العربية السعودية · وزارة التعليم</small>متوسطة خيبر الجنوب (بنات)</div></div>
   <h1>ملف الإنجازات</h1>
   <p class="lead">أهلاً بالفريق الزائر. يعرض هذا الملف ابتكارات المدرسة ومبادراتها ومشاريعها التعليمية وسجلاتها الرقمية، وفريق العمل والمهام المنفذة، مع رابط ورمز QR لفتح كل عمل مباشرة.</p>
-  <div class="visit"><span>الفصل الدراسي الأول ١٤٤٨هـ</span><span>مديرة المدرسة: أ. زهراء مفلح</span></div>
+  <div class="visit"><span>الفصل الدراسي الأول ١٤٤٨هـ</span><span>مديرة المدرسة: أ. زهراء مفلح</span><span>تصميم: أ. أمل الشهري</span></div>
   <button type="button" class="play-btn" data-open-show><i>▶</i>شغّلي وضع المعرض</button>
 </div></header>
 
@@ -245,7 +245,7 @@ footer{color:var(--muted);font-size:.85rem;padding-block:34px 40px;text-align:ce
     </table></div>
   </section>
 </main>
-<footer class="wrap">متوسطة خيبر الجنوب (بنات) · ملف الإنجازات للزيارة · ١٤٤٨هـ</footer>
+<footer class="wrap">متوسطة خيبر الجنوب (بنات) · ملف الإنجازات للزيارة · ١٤٤٨هـ<br>تصميم وإعداد: <b>أ. أمل الشهري</b></footer>
 <section class="show" id="show" hidden aria-label="وضع المعرض">
   <div class="inner">
     <div class="shead"><img src="img/moe.png" alt="شعار وزارة التعليم"><strong>متوسطة خيبر الجنوب · معرض الإنجازات</strong><button type="button" class="x" id="sClose" aria-label="إغلاق المعرض">✕</button></div>
@@ -441,7 +441,7 @@ ORDER.forEach(k=>{
   S.push({ico:k,k:`${ar(ws.length)} أعمال`,t:CATS[k].name,p:DEF[k],ms:4000});
   ws.forEach((w,j)=>S.push({ico:k,w,k2:k,n:j+1,ms:w.pics?10000:9000}));
 });
-S.push({ico:"end",k:"شكراً لكم",t:"نفخر بإبداع منسوباتنا",p:"متوسطة خيبر الجنوب (بنات) · بإشراف مديرة المدرسة أ. زهراء مفلح.",ms:5000});
+S.push({ico:"end",k:"شكراً لكم",t:"نفخر بإبداع منسوباتنا",p:"متوسطة خيبر الجنوب (بنات) · بإشراف مديرة المدرسة أ. زهراء مفلح · تصميم أ. أمل الشهري.",ms:5000});
 const e=s=>esc(s);
 $("#stage").innerHTML=S.map((s,i)=>{
   if(!s.w)return `<div class="slide"><div class="ico">${ICON[s.ico]}</div><div class="txt"><div class="k"><b>${e(s.k)}</b></div><h2>${e(s.t)}</h2><p>${e(s.p)}</p></div></div>`;
