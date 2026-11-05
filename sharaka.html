@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>سجل الشراكة المجتمعية</title>
+<meta name="description" content="سجل الشراكة المجتمعية — متوسطة خيبر الجنوب للبنات — إعداد مسؤولة الشراكة أ. أمل الشهري">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap">
+<style>
+:root{--bg:#f7faf8;--card:#fff;--ink:#24423a;--muted:#6f827c;--line:#e6eeea;--head:#20475a;--accent:#2f9c86;--soft:#eaf5f0}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0f1614;--card:#16201d;--ink:#e8efec;--muted:#95a59f;--line:#2a3833;--head:#0b2523;--accent:#2fa67f;--soft:#18352c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1614;--card:#16201d;--ink:#e8efec;--muted:#95a59f;--line:#2a3833;--head:#0b2523;--accent:#2fa67f;--soft:#18352c;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Tajawal","Segoe UI",Tahoma,sans-serif;line-height:1.7;min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--head);color:#fff;padding:34px 16px 40px;text-align:center;border-bottom:4px solid var(--accent)}
+header p{margin:0;opacity:.85;font-size:.95rem}
+h1{margin:6px 0 4px;font-size:clamp(1.7rem,6vw,2.4rem);font-weight:800}
+main{flex:1;width:100%;max-width:640px;margin:-22px auto 24px;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px 20px;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.06)}
+.btn{display:inline-block;background:var(--accent);color:#fff;text-decoration:none;font-weight:700;font-size:1.1rem;padding:14px 28px;border-radius:12px;margin:8px 0}
+.list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 4px;padding:0;list-style:none}
+.list li{background:var(--soft);border-radius:999px;padding:4px 12px;font-size:.88rem}
+small{color:var(--muted);display:block;margin-top:10px}
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:0 16px 22px}
+</style>
+</head>
+<body>
+<header>
+  <p>وزارة التعليم — متوسطة خيبر الجنوب للبنات</p>
+  <h1>سجل الشراكة المجتمعية</h1>
+  <p>العام الدراسي 1448هـ — إعداد مسؤولة الشراكة أ. أمل الشهري</p>
+</header>
+<main>
+  <div class="card">
+    <p style="margin:0 0 6px">السجل الإلكتروني للشراكة المجتمعية، يُحدَّث أولاً بأول.</p>
+    <a class="btn" id="go" href="https://claude.ai/artifact/XTZJKsUdo8xX5YPBRqc5Mq">فتح سجل الشراكة</a>
+    <ul class="list">
+      <li>التعاون والشراكات</li><li>خطة الشراكة 1448هـ</li><li>الرؤية والرسالة</li><li>مجلد المعلمة أمل الشهري</li>
+      <li>الاجتماعات</li><li>النماذج</li><li>شركاء النجاح</li><li>النشرات التوعوية</li><li>التقارير والشهادات</li>
+    </ul>
+    <small id="msg">يتم فتح السجل تلقائيًا…</small>
+  </div>
+</main>
+<footer>تصميم أ. أمل الشهري · مديرة المدرسة أ. زهراء الشهراني</footer>
+<script>setTimeout(function(){location.href=document.getElementById('go').href},1500);</script>
+</body>
+</html>

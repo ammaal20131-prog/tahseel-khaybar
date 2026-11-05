@@ -24,7 +24,7 @@ export const OD_LINKS = {
   ]
  },
  "أمل الشهري": {
-  "partnership": "https://claude.ai/artifact/XTZJKsUdo8xX5YPBRqc5Mq",
+  "partnership": "https://ammaal20131-prog.github.io/tahseel-khaybar/sharaka.html",
   "main": "https://asrgirls-my.sharepoint.com/:f:/g/personal/t97254394_asrg_moe_gov_sa/IgD3hiiVbI1fT7dDblDs56jYAddG7X99nrBTuwWdL3Ka01A",
   "sections": {
    "k1": "https://asrgirls-my.sharepoint.com/:f:/g/personal/t97254394_asrg_moe_gov_sa/IgBvz4mYJ6dFRqcEGvbGd98nATbHQ-jxLKOMtRVZhE71c5c",
