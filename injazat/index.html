@@ -390,6 +390,10 @@ const W=[
 ];
 W.sort((a,b)=>ORDER.indexOf(a.c)-ORDER.indexOf(b.c));
 W.forEach((w,i)=>w.i=i);
+const KIND=[["وعي رقمي","توعوية"],["درع الوطن","وطنية"],["أثرٌ يبقى","وقفية مجتمعية"],["أفق القراءة","قرائية"],["متمكنة رقمياً","تعليمية مهارية"],["المتميزات","تحفيزية"],["قلوب لا تؤذي","توعوية سلوكية"],["مبادرات الطالبات","طلابية"]];
+W.forEach(w=>{if(w.c==="init"){const m=KIND.find(([k])=>w.t.includes(k));if(m)w.kind=m[1];}});
+const oneOf=(w,c)=>c.one+(w.kind&&c===CATS.init?" "+w.kind:"");
+
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 const ar=n=>n.toLocaleString("ar-SA");
@@ -434,7 +438,7 @@ function renderFiles(){
       :"";
     return `<article class="file ${c.cls}" id="f${w.i}">
       <div class="main">
-        <div class="hd"><div class="num">${ar(w.i+1)}</div><div><h3>${esc(w.t)}</h3><span class="tag">${c.one}${(w.also||[]).map(k=>"، "+CATS[k].one).join("")}، ${FIELDS[w.f]}</span></div></div>
+        <div class="hd"><div class="num">${ar(w.i+1)}</div><div><h3>${esc(w.t)}</h3><span class="tag">${oneOf(w,c)}${(w.also||[]).map(k=>"، "+CATS[k].one).join("")}، ${FIELDS[w.f]}</span></div></div>
         <div class="meta"><span>التنفيذ: <b>${byOf(w).map(k=>T[k].n).join(" و")}</b></span><span>المستفيدون: <b>${esc(w.aud)}</b></span></div>
         <p>${esc(w.d)}</p>
         <div class="ind">${w.ind.map(([n,l])=>`<span>${n?`<b>${n}</b>`:""}${l}</span>`).join("")}</div>
@@ -483,7 +487,7 @@ $("#stage").innerHTML=S.map((s,i)=>{
   const w=s.w,c=CATS[s.k2],who=byOf(w).map(k=>T[k].n).join(" و");
   const go=w.u?`<a class="go" href="${e(w.u)}" target="_blank" rel="noopener">${w.ul||"افتح العمل"} ↗</a>`:"";
   const gal=w.pics?`<div class="gal">${w.pics.map(p=>`<img src="${p}" alt="من صور وقف المدرسة">`).join("")}</div>`:"";
-  return `<div class="slide"><div class="ico">${ICON[s.ico]}</div><div class="txt"><div class="k"><b>${c.one} ${ar(s.n)}</b><span>${e(w.aud)}</span></div><h2>${e(w.t)}</h2><p>${e(w.d)}</p><div class="who">إعداد ${e(who)}</div>${go}</div>${gal}</div>`;
+  return `<div class="slide"><div class="ico">${ICON[s.ico]}</div><div class="txt"><div class="k"><b>${oneOf(w,c)} ${ar(s.n)}</b><span>${e(w.aud)}</span></div><h2>${e(w.t)}</h2><p>${e(w.d)}</p><div class="who">إعداد ${e(who)}</div>${go}</div>${gal}</div>`;
 }).join("");
 $("#bars").innerHTML=S.map((s,i)=>`<button type="button" aria-label="الشريحة ${i+1}"><i></i></button>`).join("");
 const slides=[...document.querySelectorAll("#stage .slide")],bars=[...document.querySelectorAll("#bars button")];
