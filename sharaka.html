@@ -112,7 +112,7 @@ const IC={coop:'<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 
  flyers:'<path d="M3 11v3l3 .5L13 19V6L6 10.5zM16.5 9a4 4 0 0 1 0 6"/>',
  docs:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'};
 const svg=(k,s=28)=>`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
-const SECT=[["coop","التعاون والشراكات","سجل كل تعاون مع جهة: الموضوع والمستفيدون والأثر والشواهد","c1"],["plan","خطة الشراكة 1448هـ","أنشطة خطة الفصل الدراسي الأول وحالة تنفيذ كل نشاط وشواهده","c8"],["vision","الرؤية والرسالة","رؤية المدرسة ورسالتها وقيمها","c6"],["folder","مجلد المعلمة أمل الشهري","ملفاتي في ملف التحصيل الدراسي: الخطط والتحليلات والخطة الأسبوعية","c3"],["about","التعريف بالشراكة","الرؤية والرسالة، المفهوم، القيم، الأهداف، الأهمية، المعايير والضوابط","c2"],
+const SECT=[["coop","التعاون والشراكات","سجل كل تعاون مع جهة: الموضوع والمستفيدون والأثر والشواهد","c1"],["plan","خطة الشراكة 1448هـ","أنشطة خطة الفصل الدراسي الأول وحالة تنفيذ كل نشاط وشواهده","c8"],["vision","الرؤية والرسالة","رؤية المدرسة ورسالتها وقيمها","c6"],["about","التعريف بالشراكة","الرؤية والرسالة، المفهوم، القيم، الأهداف، الأهمية، المعايير والضوابط","c2"],
  ["team","قرار التكليف ولجنة الشراكة","تكليف مسؤولة الشراكة ومهامها وأعضاء اللجنة","c3"],["meet","الاجتماعات","محاضر اجتماعات لجنة الشراكة وتوصياتها","c4"],
  ["forms","النماذج","نماذج إعداد الشراكة ومتابعتها وتقييمها","c5"],["thanks","شركاء النجاح","تقدير وامتنان للجهات المتعاونة","c6"],["flyers","النشرات التوعوية","نشرات «الشراكة المدرسية.. تعاون يصنع التميز» لأولياء الأمور","c4"],["docs","التقارير والشهادات والعقود","روابط التوثيق والشواهد","c7"]];
 const TYPES=["أسرية","مجتمعية","حكومية","قطاع خاص","غير ربحي","تطوعية"];
@@ -132,7 +132,7 @@ function openPdf(u,n){$("#sheet").innerHTML=`<div class="row" style="justify-con
 async function dlPdf(u,n,b){if(!S.dl){const x=document.createElement("a");x.href=u;x.download=n.replace(/[\\/:*?"<>|—]+/g," ").trim()+u.slice(u.lastIndexOf("."));document.body.appendChild(x);x.click();x.remove();return}b.disabled=true;try{const r=await fetch(u);if(!r.ok)throw 0;const bl=await r.blob();await S.dl.save({filename:n.replace(/[\\/:*?"<>|—]+/g," ").trim()+"."+((bl.type.split("/")[1]||"pdf").replace("jpeg","jpg")),data:bl})}catch(e){if(!e||e.code!=="declined")toast("تعذّر التنزيل")}finally{b.disabled=false}}
 function render(){const m=$("#main");
  if(S.view==="home"){m.innerHTML=vHome();return}
- const f={folder:vFolder,vision:vVision,plan:vPlan,coop:vCoop,about:vAbout,team:vTeam,meet:vMeet,forms:vForms,thanks:vThanks,flyers:vFlyers,docs:vDocs}[S.view]||vHome;m.innerHTML=nav()+f()}
+ const f={vision:vVision,plan:vPlan,coop:vCoop,about:vAbout,team:vTeam,meet:vMeet,forms:vForms,thanks:vThanks,flyers:vFlyers,docs:vDocs}[S.view]||vHome;m.innerHTML=nav()+f()}
 
 function vHome(){const done=S.coop.filter(c=>c.status===2).length,partners=new Set(S.coop.map(c=>c.partner).filter(Boolean)).size,ben=S.coop.reduce((a,c)=>a+(+c.count||0),0);
  const sub={plan:`${PLAN.rows.filter((r,i)=>(S.plan[i]||{}).s===2).length} من ${PLAN.rows.length} منفّذ`,coop:`${S.coop.length} تعاون مسجل`,meet:`${S.meet.length} اجتماع`,thanks:`${partners} جهة`,docs:`${S.links.length} رابط`};
