@@ -275,18 +275,18 @@ const CATS0={
 };
 const ORDER=["inno","init","proj","rec","tch","stu"];
 const CATS=Object.fromEntries(ORDER.map(k=>[k,CATS0[k]]));
-const FIELDS=["المهارات الرقمية","الوعي والمواطنة","العلوم","الدراسات الإسلامية والوقف","التطوير الإداري"];
+const FIELDS=["المهارات الرقمية","الوعي والمواطنة","العلوم","الدراسات الإسلامية والوقف",""];
 const T={
-  amal:{n:"أ. أمل الشهري",r:"معلمة · مسؤولة الشراكة المجتمعية · عضوة لجنة التحصيل الدراسي"},
-  ahlam:{n:"أ. أحلام الشهراني",r:"معلمة المهارات الرقمية"},
-  sara:{n:"أ. سارة عبيد الشهراني",r:"معلمة الدراسات الإسلامية"},
-  noha:{n:"أ. نهى الزهراني",r:"معلمة العلوم"},
+  amal:{n:"أ. أمل الشهري",r:"معلمة المهارات الرقمية · مسؤولة الشراكة المجتمعية · عضوة لجنة التحصيل الدراسي",sub:"المهارات الرقمية"},
+  ahlam:{n:"أ. أحلام راشد الشهراني",r:"معلمة المهارات الرقمية",sub:"المهارات الرقمية"},
+  sara:{n:"أ. سارة عبيد الشهراني",r:"معلمة الدراسات الإسلامية",sub:"الدراسات الإسلامية"},
+  noha:{n:"أ. نهى الزهراني",r:"معلمة العلوم",sub:"العلوم"},
   admin:{n:"إدارة المدرسة",r:"بإشراف المديرة أ. زهراء مفلح"},
-  munira:{n:"أ. منيرة الشهراني",r:"معلمة"},
+  munira:{n:"أ. منيرة الشهراني",r:"معلمة التربية الأسرية",sub:"التربية الأسرية"},
   shaima:{n:"أ. الشيماء عسيري",r:"الموجهة الطلابية"},
-  hayaa:{n:"أ. هياء محمد",r:"معلمة العلوم"},
-  zahra:{n:"أ. زهرة القحطاني",r:"معلمة الاجتماعيات"},
-  ghazwa:{n:"أ. غزوا العتيبي",r:"معلمة العلوم"},
+  hayaa:{n:"أ. هياء محمد",r:"معلمة العلوم",sub:"العلوم"},
+  zahra:{n:"أ. زهرة القحطاني",r:"معلمة الاجتماعيات",sub:"الاجتماعيات"},
+  ghazwa:{n:"أ. غزوا العتيبي",r:"معلمة العلوم",sub:"العلوم"},
   aisha:{n:"أ. عائشة عمير الشهراني",r:"معلمة"},
   staff:{n:"معلمات المدرسة",r:"مبادرات حسب التخصص"}
 };
@@ -359,7 +359,7 @@ const W=[
   d:"منصة تجمع ملفات إنجاز طالبات المهارات الرقمية: تختار الطالبة فصلها ثم اسمها، وترفع أعمالها في مجلدها الخاص، فتجتمع مشاريعها وواجباتها وأوراق عملها في مكان واحد.",
   ind:[["","مجلد لكل طالبة"],["","حسب الفصل"],["","رفع الأعمال إلكترونياً"]],
   task:"بناء منصة ملفات الطالبات ومتابعة رفع الأعمال"},
- {c:"stu",f:0,by:"ahlam",t:"ملف إنجاز طالبات المهارات الرقمية: أ. أحلام الشهراني",aud:"طالبات المهارات الرقمية وأولياء الأمور",u:"https://drive.google.com/drive/folders/1XG5IgGVIKGYmHoq8KIl3qnNt7F0f3fi1ILmFq3UClgDyF7qxA6VE4dPlQdE3wE5R2ASNkMtb",ul:"افتح المجلد",
+ {c:"stu",f:0,by:"ahlam",t:"ملف إنجاز طالبات المهارات الرقمية: أ. أحلام راشد الشهراني",aud:"طالبات المهارات الرقمية وأولياء الأمور",u:"https://drive.google.com/drive/folders/1XG5IgGVIKGYmHoq8KIl3qnNt7F0f3fi1ILmFq3UClgDyF7qxA6VE4dPlQdE3wE5R2ASNkMtb",ul:"افتح المجلد",
   d:"مجلد على Google Drive يجمع إنجازات طالبات المهارات الرقمية وأعمالهن في مكان واحد، بإشراف معلمة المادة.",
   ind:[["","مادة المهارات الرقمية"],["","مجلد Google Drive"],["","إنجازات الطالبات"]],
   task:"جمع إنجازات الطالبات وتوثيقها"},
@@ -379,7 +379,7 @@ const W=[
   d:"ملف إنجاز رقمي على منصة Padlet يجمع أعمال المعلمة وشواهدها في لوحة واحدة يسهل الاطلاع عليها.",
   ind:[["","لوحة Padlet"],["","ملف إنجاز رقمي"]],
   task:"إعداد ملف إنجازها الرقمي وتحديثه"},
- {c:"tch",f:4,by:"ahlam",t:"ملف إنجاز المعلمة: أ. أحلام الشهراني",aud:"الإدارة والمشرفات",u:"https://asrgirls-my.sharepoint.com/:f:/g/personal/t94077137_asrg_moe_gov_sa/IgBm8fxcudFATrKBcLRVldSVAY8JgDhti9_WsgoKralLVuA?e=NFRl9Y",ul:"افتح المجلد",
+ {c:"tch",f:4,by:"ahlam",t:"ملف إنجاز المعلمة: أ. أحلام راشد الشهراني",aud:"الإدارة والمشرفات",u:"https://asrgirls-my.sharepoint.com/:f:/g/personal/t94077137_asrg_moe_gov_sa/IgBm8fxcudFATrKBcLRVldSVAY8JgDhti9_WsgoKralLVuA?e=NFRl9Y",ul:"افتح المجلد",
   d:"ملف إنجاز رقمي في مجلد على OneDrive التابع لوزارة التعليم، يجمع أعمال المعلمة وشواهدها في مكان واحد.",
   ind:[["","مجلد OneDrive"],["","ملف إنجاز رقمي"]],
   task:"إعداد ملف إنجازها الرقمي وتحديثه"},
@@ -420,6 +420,7 @@ W.sort((a,b)=>ORDER.indexOf(a.c)-ORDER.indexOf(b.c));
 W.forEach((w,i)=>w.i=i);
 const KIND=[["وعي رقمي","توعوية"],["درع الوطن","وطنية"],["أثرٌ يبقى","وقفية مجتمعية"],["أفق القراءة","قرائية"],["متمكنة رقمياً","تعليمية مهارية"],["المتميزات","تحفيزية"],["قلوب لا تؤذي","توعوية سلوكية"],["مبادرات الطالبات","طلابية"],["ارسم وطني","وطنية"]];
 W.forEach(w=>{if(w.c==="init"){const m=KIND.find(([k])=>w.t.includes(k));if(m)w.kind=m[1];}});
+const fieldOf=w=>{const subs=[...new Set([].concat(w.by).map(k=>T[k]&&T[k].sub).filter(Boolean))];if(w.c==="tch"||w.c==="stu"||w.f===4)return subs.join(" و");return FIELDS[w.f];};
 const oneOf=(w,c)=>c.one+(w.kind&&c===CATS.init?" "+w.kind:"");
 
 const $=s=>document.querySelector(s);
@@ -433,7 +434,7 @@ const people=new Set(W.flatMap(byOf).filter(k=>k!=="admin"));
 const linked=W.filter(w=>w.u&&/^https?:/.test(w.u)).length;
 $("#kpis").innerHTML=[
   ["dark",W.length,"عملاً موثقاً","ابتكارات ومبادرات ومشاريع وسجلات"],
-  ["",FIELDS.length,"مجالات","من الرقمي إلى الإداري"],
+  ["",FIELDS.filter(Boolean).length,"مجالات","رقمية ووطنية وعلمية وإسلامية"],
   ["",linked,"أعمال رقمية","تُفتح برابط مباشر"]
 ].map(([c,n,l,s])=>`<div class="kpi ${c}"><b>${ar(n)}</b><span>${l}</span><small>${s}</small></div>`).join("");
 function bars(rows){
@@ -466,7 +467,7 @@ function renderFiles(){
       :"";
     return `<article class="file ${c.cls}" id="f${w.i}">
       <div class="main">
-        <div class="hd"><div class="num">${ar(w.i+1)}</div><div><h3>${esc(w.t)}</h3><span class="tag">${oneOf(w,c)}${(w.also||[]).map(k=>"، "+CATS[k].one).join("")}، ${FIELDS[w.f]}</span></div></div>
+        <div class="hd"><div class="num">${ar(w.i+1)}</div><div><h3>${esc(w.t)}</h3><span class="tag">${oneOf(w,c)}${(w.also||[]).map(k=>"، "+CATS[k].one).join("")}${(f=>f?"، "+f:"")(fieldOf(w))}</span></div></div>
         <div class="meta"><span>التنفيذ: <b>${byOf(w).map(k=>T[k].n).join(" و")}</b></span><span>المستفيدون: <b>${esc(w.aud)}</b></span></div>
         <p>${esc(w.d)}</p>
         <div class="ind">${w.ind.map(([n,l])=>`<span>${n?`<b>${n}</b>`:""}${l}</span>`).join("")}</div>
