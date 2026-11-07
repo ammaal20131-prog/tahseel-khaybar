@@ -44,7 +44,8 @@ export default async function loginPage(root) {
     await withBusy(btn, async () => {
       try {
         await login(form.u.value, form.p.value);
-        if (location.hash && location.hash !== '#/') location.hash = '#/';
+        // يبقى الرابط المطلوب (مثل رمز QR لقسم) بعد الدخول؛ وإلا فالصفحة الرئيسية
+        if (location.hash && location.hash !== '#/' && !/^#\/(folder|quick)\b/.test(location.hash)) location.hash = '#/';
         const { boot } = await import('../main.js');
         await boot();
       } catch (ex) {
