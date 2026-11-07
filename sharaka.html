@@ -149,7 +149,7 @@ function render(){const m=$("#main");
  if(S.view==="home"){m.innerHTML=vHome();return}
  const f={vision:vVision,plan:vPlan,coop:vCoop,about:vAbout,team:vTeam,meet:vMeet,forms:vForms,thanks:vThanks,flyers:vFlyers,docs:vDocs}[S.view]||vHome;m.innerHTML=nav()+f()}
 
-function vHome(){const done=S.coop.filter(c=>c.status===2).length,partners=new Set(S.coop.map(c=>c.partner).filter(Boolean)).size,ben=S.coop.reduce((a,c)=>a+(+c.count||0),0);
+function vHome(){const done=S.coop.filter(c=>c.status===2).length,partners=new Set(S.coop.map(c=>c.partner).filter(Boolean)).size,ben=219;/* المستفيدون: 194 طالبة + 25 معلمة */
  const sub={plan:`${PLAN.rows.filter((r,i)=>(S.plan[i]||{}).s===2).length} من ${PLAN.rows.length} منفّذ`,coop:`${S.coop.length} تعاون مسجل`,meet:`${S.meet.length} اجتماع`,thanks:`${partners} جهة`,docs:`${S.links.length} رابط`};
  return `<section class="cover"><img src="${LOGO}" alt="شعار وزارة التعليم"><p class="k">${esc(C.region)} · ${esc(C.school)}</p><h1>سجل الشراكة المجتمعية</h1><p class="s">للعام الدراسي ${esc(C.year)}</p>
  <p class="q">«${esc(C.quote)}»</p>
