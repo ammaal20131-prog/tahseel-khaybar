@@ -23,7 +23,7 @@ export default async function folder(view, params, query) {
 }
 
 async function teacherList(view, cat, query = {}) {
-  const [prog, reqs, files] = await Promise.all([q.progress(), q.reqStatus(), q.files({ category: cat.key })]);
+  const [prog, reqs, files, asg] = await Promise.all([q.progress(), q.reqStatus(), q.files({ category: cat.key }), q.assignments().catch(() => [])]);
   const byT = {};
   files.forEach((f) => { (byT[f.teacher_id] ||= []).push(f); });
   // نافس: معلمات العلوم والرياضيات واللغة العربية فقط (من لديهن متطلبات نافس أو ملفات فيه)
@@ -42,10 +42,11 @@ async function teacherList(view, cat, query = {}) {
       `<a href="#/folders">المجلدات</a> ${icon('chevron-left')} <span>${esc(cat.title)}</span>`)}
     <div class="card">
       <div class="filters" style="margin-bottom:12px">
-        <input type="search" placeholder="بحث باسم المعلمة" data-f>
+        <input type="search" placeholder="بحث باسم المعلمة أو المادة أو الملف" data-f>
         <select data-st><option value="">كل الحالات</option><option value="missing">لديها نواقص</option><option value="review">بانتظار مراجعة</option><option value="done">مكتمل الرفع</option></select>
         <div class="row" style="gap:6px;margin-inline-start:auto">
-          <button class="btn sm" data-mode="show">${icon('presentation')} عرض سريع</button>
+          <button class="btn sm" data-mode="subject">${icon('book-open')} حسب المادة</button>
+          <button class="btn sm" data-mode="show">${icon('users')} حسب المعلمة</button>
           <button class="btn sm" data-mode="folders">${icon('folder')} المجلدات</button>
         </div>
       </div>
@@ -53,13 +54,36 @@ async function teacherList(view, cat, query = {}) {
     </div>`;
   const grid = view.querySelector('[data-grid]');
   // العرض السريع: اسم المعلمة ثم ملفاتها، والضغط على الملف يفتحه مباشرة (مناسب لعرض العمل للزوار)
-  let mode = query.view || (() => { try { return localStorage.getItem('tahseel-folder-mode'); } catch (_) { return null; } })() || (App.profile.role === 'principal' ? 'show' : 'folders');
+  let mode = query.view || (() => { try { return localStorage.getItem('tahseel-folder-mode'); } catch (_) { return null; } })() || (App.profile.role === 'principal' ? 'subject' : 'folders');
   const setMode = (m) => { mode = m; try { localStorage.setItem('tahseel-folder-mode', m); } catch (_) {} paint(); };
   view.querySelectorAll('[data-mode]').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  // المادة لكل ملف: من بيانات الملف، أو اسم مجلده الأول إن كان مادة، أو مادة المعلمة إن كانت تدرّس مادة واحدة
+  const subjNames = new Set(App.subjects.map((x) => x.name));
+  const tName = new Map(rows.map((r) => [r.teacher_id, r.full_name]));
+  const subjOf = (f) => {
+    if (f.subject_id && subjectName(f.subject_id)) return subjectName(f.subject_id);
+    const top = (f.folder_path || '').split('/')[0];
+    if (subjNames.has(top)) return top;
+    const ts = [...new Set(asg.filter((a) => a.teacher_id === f.teacher_id).map((a) => subjectName(a.subject_id)).filter(Boolean))];
+    return ts.length === 1 ? ts[0] : 'مواد أخرى';
+  };
+  const fileBtn = (f, who) => `<a class="qs-f" data-open="${f.id}" href="${esc(urls.get(f.storage_path) || '#')}" target="_blank" rel="noopener">${icon(fileIcon(f.name))} <span>${esc(f.name)}${who ? `<small class="qs-who">${esc(who)}</small>` : ''}</span></a>`;
+  const subjectList = (q0, tids) => {
+    const fs = files.filter((f) => tids.has(f.teacher_id) && (!q0 || [f.name, tName.get(f.teacher_id), subjOf(f)].some((x) => (x || '').includes(q0))));
+    if (!fs.length) return emptyState('لا توجد ملفات مطابقة', 'files');
+    const groups = new Map();
+    fs.forEach((f) => { const k = subjOf(f); (groups.get(k) || groups.set(k, []).get(k)).push(f); });
+    const keys = [...groups.keys()].sort((a, b) => (a === 'مواد أخرى') - (b === 'مواد أخرى') || a.localeCompare(b, 'ar'));
+    return `<div class="qs-list">${keys.map((k) => {
+      const g = groups.get(k).sort((a, b) => (tName.get(a.teacher_id) || '').localeCompare(tName.get(b.teacher_id) || '', 'ar'));
+      return `<details class="qs-t" ${q0 || keys.length === 1 ? 'open' : ''}><summary><span class="qs-n">${icon('book-open')} ${esc(k)}</span><span class="chip ok">${fmtNum(g.length)} ملف</span></summary>
+        <div class="qs-files">${g.map((f) => fileBtn(f, tName.get(f.teacher_id))).join('')}</div></details>`;
+    }).join('')}</div>`;
+  };
   const showList = (list) => list.length ? `<div class="qs-list">${list.map((r) => {
       const fs = byT[r.teacher_id] || [];
       return `<details class="qs-t" ${list.length === 1 ? 'open' : ''}><summary><span class="qs-n">${icon('user')} ${esc(r.full_name)}</span><span class="chip ${fs.length ? 'ok' : ''}">${fmtNum(fs.length)} ملف</span></summary>
-        ${fs.length ? `<div class="qs-files">${fs.map((f) => `<a class="qs-f" data-open="${f.id}" href="${esc(urls.get(f.storage_path) || '#')}" target="_blank" rel="noopener">${icon(fileIcon(f.name))} <span>${esc(f.name)}</span></a>`).join('')}</div>` : '<p class="muted" style="margin:8px 0">لا توجد ملفات بعد</p>'}
+        ${fs.length ? `<div class="qs-files">${fs.map((f) => fileBtn(f)).join('')}</div>` : '<p class="muted" style="margin:8px 0">لا توجد ملفات بعد</p>'}
       </details>`;
     }).join('')}</div>` : emptyState('لا نتائج مطابقة', 'users');
   const fileById = new Map(files.map((f) => [f.id, f]));
@@ -84,13 +108,13 @@ async function teacherList(view, cat, query = {}) {
   const paint = () => {
     const f = view.querySelector('[data-f]').value.trim();
     const st = view.querySelector('[data-st]').value;
-    const list = rows.filter((r) => (!f || r.full_name.includes(f)) &&
+    const list = rows.filter((r) => (mode === 'subject' || !f || r.full_name.includes(f)) &&
       (!st || (st === 'missing' && r.submitted < r.req) || (st === 'review' && r.review) || (st === 'done' && r.req && r.submitted === r.req)));
     view.querySelectorAll('[data-mode]').forEach((b) => b.classList.toggle('primary', b.dataset.mode === mode));
     grid.className = mode === 'show' ? '' : 'sub-folders';
-    if (mode === 'show') {
+    if (mode === 'show' || mode === 'subject') {
       if (!urlsAt) { grid.innerHTML = '<p class="muted">جارٍ تجهيز الملفات…</p>'; loadUrls().catch(() => { urlsAt = 1; }).then(paint); return; }
-      grid.innerHTML = showList(list); refreshIcons(); return;
+      grid.innerHTML = mode === 'subject' ? subjectList(f, new Set(list.map((r) => r.teacher_id))) : showList(list); refreshIcons(); return;
     }
     grid.innerHTML = list.length ? list.map((r) => `<a class="sub-folder" href="${folderLink(cat.key, r.teacher_id)}" style="flex-direction:column;align-items:stretch;gap:8px">
       <div class="row" style="gap:10px;flex-wrap:nowrap">${icon('folder')}<div style="min-width:0"><div class="sn">${esc(r.full_name)}</div>
