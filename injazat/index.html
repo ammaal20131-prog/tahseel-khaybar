@@ -59,7 +59,13 @@ h1{font-family:var(--f-display);font-weight:400;font-size:clamp(2.2rem,7vw,3.4re
 .visit span{background:rgba(255,255,255,.22);border-radius:999px;padding:4px 14px;font-size:.88rem;font-weight:500}
 
 .tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);margin-top:14px}
-.tabs .wrap{display:flex;gap:8px;overflow-x:auto;padding-block:10px;scrollbar-width:none}
+.tabs .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding-block:10px}
+.srch{flex:1 1 260px;display:flex;align-items:center;gap:8px;background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:0 14px;min-width:0}
+.srch:focus-within{border-color:var(--c-init)}
+.srch span{color:var(--muted);font-size:1.2rem;line-height:1}
+.srch input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;padding:9px 0;outline:none}
+.rescount{font-family:var(--f-head);font-weight:700;color:var(--muted);padding:4px 6px}
+@media (max-width:640px){.srch{flex-basis:100%}}
 .tabs a{flex:none;text-decoration:none;color:var(--chip-ink);background:var(--chip);border-radius:999px;padding:8px 18px;font-weight:600;font-size:.92rem}
 .tabs a.on{background:var(--gold);color:var(--gold-ink)}
 
@@ -220,6 +226,7 @@ footer{color:var(--muted);font-size:.85rem;padding-block:34px 40px;text-align:ce
 </div></header>
 
 <nav class="tabs" aria-label="أقسام الملف"><div class="wrap">
+  <label class="srch" for="q"><span aria-hidden="true">⌕</span><input id="q" type="search" placeholder="ابحثي عن عمل أو معلمة أو مادة" autocomplete="off" aria-label="بحث في أعمال المدرسة"></label>
   <a href="#summary" class="on">الملخص</a><a href="#works">ملفات الأعمال</a><a href="#team">فريق العمل والمهام</a><a href="#show" class="show-tab" data-open-show>▶ وضع المعرض</a>
 </div></nav>
 
@@ -517,12 +524,17 @@ $("#teamBody").innerHTML=Object.entries(T).map(([k,p])=>{
 let filter=null;
 function renderFilters(){
   $("#filters").innerHTML=Object.entries(CATS).map(([k,c])=>`<button type="button" class="${c.cls}" aria-expanded="${filter===k}" aria-controls="files" data-k="${k}"><b>${ar(W.filter(w=>inCat(w,k)).length)}</b><span>${c.name}</span><i aria-hidden="true">⌄</i></button>`).join("");
-  $("#filters").querySelectorAll("button").forEach(b=>b.onclick=()=>{filter=filter===b.dataset.k?null:b.dataset.k;renderFiles();});
+  $("#filters").querySelectorAll("button").forEach(b=>b.onclick=()=>{filter=filter===b.dataset.k?null:b.dataset.k;query="";$("#q").value="";renderFiles();});
 }
+let query="";
+const norm=s=>String(s).replace(/[\u064B-\u0652\u0640]/g,"").replace(/[أإآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").toLowerCase();
+const hay=w=>[w.t,w.aud,w.d,byOf(w).map(k=>T[k]?T[k].n:"").join(" "),CATS[w.c].name,w.kind||"",fieldOf(w)||""].join(" ");
 function renderFiles(){
   renderFilters();
-  if(!filter){$("#files").innerHTML=`<div class="hint">اضغطي على أي قسم لعرض أعماله</div>`;return;}
-  $("#files").innerHTML=W.filter(w=>inCat(w,filter)).map(w=>{
+  const list=query?W.filter(w=>norm(hay(w)).includes(norm(query))):filter?W.filter(w=>inCat(w,filter)):null;
+  if(!list){$("#files").innerHTML=`<div class="hint">اضغطي على أي قسم لعرض أعماله، أو ابحثي من المربع في الأعلى</div>`;return;}
+  if(!list.length){$("#files").innerHTML=`<div class="hint">لا توجد نتائج لـ «${esc(query)}». جرّبي اسم معلمة أو كلمة من عنوان العمل.</div>`;return;}
+  $("#files").innerHTML=(query?`<div class="rescount">نتائج البحث عن «${esc(query)}»: ${ar(list.length)}</div>`:"")+list.map(w=>{
     const c=CATS[w.c];
     const ext=w.u&&/^https?:/.test(w.u);
     const side=w.u?`${ext?`<div class="qr" data-url="${esc(w.u)}" aria-label="رمز QR لفتح ${esc(w.t)}"></div>`:""}<a class="open" href="${esc(w.u)}" target="_blank" rel="noopener">${w.ul||"افتح العمل"} ↗</a>${w.u2?`<a class="open" href="${esc(w.u2)}" target="_blank" rel="noopener">${w.ul2||"الدليل المصوّر"} ↗</a>`:""}${ext?`<small>امسحي الرمز بكاميرا الجوال</small>`:""}`
@@ -542,6 +554,11 @@ function renderFiles(){
   else document.querySelectorAll(".qr").forEach(el=>{const s=el.nextElementSibling&&el.parentElement.querySelector("small");if(s)s.remove();el.remove();});
 }
 renderFiles();
+let scrolledForSearch=false;
+$("#q").addEventListener("input",e=>{query=e.target.value.trim();if(query)filter=null;renderFiles();
+  if(query&&!scrolledForSearch){$("#works").scrollIntoView({block:"start"});scrolledForSearch=true;}if(!query)scrolledForSearch=false;});
+function fromHash(){const m=location.hash.match(/^#sec-([a-z]+)$/);if(m&&CATS[m[1]]){filter=m[1];query="";$("#q").value="";renderFiles();setTimeout(()=>$("#works").scrollIntoView({block:"start"}),80);}}
+addEventListener("hashchange",fromHash);fromHash();
 
 document.addEventListener("click",e=>{const a=e.target.closest('a.tag[href^="#f"]');if(!a)return;e.preventDefault();
   const w=W[+a.getAttribute("href").slice(2)];filter=w.c;renderFiles();const el=document.getElementById("f"+w.i);el&&el.scrollIntoView({behavior:"smooth",block:"start"});});
