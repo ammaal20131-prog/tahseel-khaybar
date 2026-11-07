@@ -14,7 +14,7 @@ export default async function folder(view, params, query) {
   // مجلد بحسب المعلمات: الإدارة ترى قائمة المعلمات أولاً، والمعلمة تُحوَّل لمجلدها
   if (cat.per_teacher && !params.teacher) {
     if (!App.isStaff) { location.replace(folderLink(cat.key, App.user.id)); return; }
-    return teacherList(view, cat);
+    return teacherList(view, cat, query);
   }
   const teacherId = params.teacher && params.teacher !== 'general' ? params.teacher : null;
   if (!teacherId && !App.isStaff) throw new Error('هذا المجلد مشترك للجنة والإدارة');
@@ -22,7 +22,7 @@ export default async function folder(view, params, query) {
   return browser(view, cat, teacherId, query.path || '');
 }
 
-async function teacherList(view, cat) {
+async function teacherList(view, cat, query = {}) {
   const [prog, reqs, files] = await Promise.all([q.progress(), q.reqStatus(), q.files({ category: cat.key })]);
   const byT = {};
   files.forEach((f) => { (byT[f.teacher_id] ||= []).push(f); });
@@ -44,15 +44,40 @@ async function teacherList(view, cat) {
       <div class="filters" style="margin-bottom:12px">
         <input type="search" placeholder="بحث باسم المعلمة" data-f>
         <select data-st><option value="">كل الحالات</option><option value="missing">لديها نواقص</option><option value="review">بانتظار مراجعة</option><option value="done">مكتمل الرفع</option></select>
+        <div class="row" style="gap:6px;margin-inline-start:auto">
+          <button class="btn sm" data-mode="show">${icon('presentation')} عرض سريع</button>
+          <button class="btn sm" data-mode="folders">${icon('folder')} المجلدات</button>
+        </div>
       </div>
       <div class="sub-folders" data-grid></div>
     </div>`;
   const grid = view.querySelector('[data-grid]');
+  // العرض السريع: اسم المعلمة ثم ملفاتها، والضغط على الملف يفتحه مباشرة (مناسب لعرض العمل للزوار)
+  let mode = query.view || (() => { try { return localStorage.getItem('tahseel-folder-mode'); } catch (_) { return null; } })() || (App.profile.role === 'principal' ? 'show' : 'folders');
+  const setMode = (m) => { mode = m; try { localStorage.setItem('tahseel-folder-mode', m); } catch (_) {} paint(); };
+  view.querySelectorAll('[data-mode]').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  const showList = (list) => list.length ? `<div class="qs-list">${list.map((r) => {
+      const fs = byT[r.teacher_id] || [];
+      return `<details class="qs-t" ${list.length === 1 ? 'open' : ''}><summary><span class="qs-n">${icon('user')} ${esc(r.full_name)}</span><span class="chip ${fs.length ? 'ok' : ''}">${fmtNum(fs.length)} ملف</span></summary>
+        ${fs.length ? `<div class="qs-files">${fs.map((f) => `<button class="qs-f" data-open="${f.id}">${icon(fileIcon(f.name))} <span>${esc(f.name)}</span></button>`).join('')}</div>` : '<p class="muted" style="margin:8px 0">لا توجد ملفات بعد</p>'}
+      </details>`;
+    }).join('')}</div>` : emptyState('لا نتائج مطابقة', 'users');
+  const fileById = new Map(files.map((f) => [f.id, f]));
+  grid.addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-open]'); if (!b) return;
+    const f = fileById.get(b.dataset.open); if (!f) return;
+    const w = window.open('', '_blank');
+    try { const url = await signedUrl(f.storage_path); if (w) w.location.href = url; else location.href = url; }
+    catch (ex) { if (w) w.close(); toast(errMsg(ex), 'bad'); }
+  });
   const paint = () => {
     const f = view.querySelector('[data-f]').value.trim();
     const st = view.querySelector('[data-st]').value;
     const list = rows.filter((r) => (!f || r.full_name.includes(f)) &&
       (!st || (st === 'missing' && r.submitted < r.req) || (st === 'review' && r.review) || (st === 'done' && r.req && r.submitted === r.req)));
+    view.querySelectorAll('[data-mode]').forEach((b) => b.classList.toggle('primary', b.dataset.mode === mode));
+    grid.className = mode === 'show' ? '' : 'sub-folders';
+    if (mode === 'show') { grid.innerHTML = showList(list); refreshIcons(); return; }
     grid.innerHTML = list.length ? list.map((r) => `<a class="sub-folder" href="${folderLink(cat.key, r.teacher_id)}" style="flex-direction:column;align-items:stretch;gap:8px">
       <div class="row" style="gap:10px;flex-wrap:nowrap">${icon('folder')}<div style="min-width:0"><div class="sn">${esc(r.full_name)}</div>
         <div class="sm">${fmtNum(r.files)} ملف${r.review ? ` · ${fmtNum(r.review)} للمراجعة` : ''}${r.last ? ' · ' + timeAgo(r.last) : ''}</div></div></div>

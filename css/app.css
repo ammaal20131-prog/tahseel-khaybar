@@ -473,3 +473,15 @@ td.actions { white-space: nowrap; text-align: end; }
 .qf-foot a:hover { text-decoration: underline; }
 .qf-plan { margin-top: 16px; }
 .qf-pl { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* العرض السريع في الأقسام: اسم المعلمة ثم ملفاتها تُفتح مباشرة */
+.qs-list { display: grid; gap: 8px; }
+.qs-t { border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; background: var(--primary-soft); }
+.qs-t[open] { background: transparent; }
+.qs-t summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 0; font-size: 1.05rem; }
+.qs-t summary::-webkit-details-marker { display: none; }
+.qs-n { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+.qs-files { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; padding: 0 0 14px; }
+.qs-f { display: flex; align-items: center; gap: 8px; text-align: start; font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; cursor: pointer; min-width: 0; }
+.qs-f span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qs-f:hover, .qs-f:focus-visible { border-color: var(--primary); background: var(--primary-soft); }
