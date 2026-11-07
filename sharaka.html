@@ -113,6 +113,7 @@ const IC={coop:'<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 
  about:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
  vision:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
  survey:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v2h6V3M9 10h6M9 14h6M9 18h3"/>',
+ charter:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17c1.5-1.5 2.5 1 4-.5"/>',
  folder:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 11v5M9.5 13.5h5"/>',
  team:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
  meet:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
@@ -122,7 +123,7 @@ const IC={coop:'<path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 
  flyers:'<path d="M3 11v3l3 .5L13 19V6L6 10.5zM16.5 9a4 4 0 0 1 0 6"/>',
  docs:'<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>'};
 const svg=(k,s=28)=>`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
-const SECT=[["coop","التعاون والشراكات","سجل كل تعاون مع جهة: الموضوع والمستفيدون والأثر والشواهد","c1"],["plan","خطة الشراكة 1448هـ","أنشطة خطة الفصل الدراسي الأول وحالة تنفيذ كل نشاط وشواهده","c8"],["vision","الرؤية والرسالة","رؤية المدرسة ورسالتها وقيمها","c6"],["survey","حصر خبرات أولياء الأمور","استبانة الخبرات والمهارات والمبادرات: 43 استجابة","c5"],["about","التعريف بالشراكة","الرؤية والرسالة، المفهوم، القيم، الأهداف، الأهمية، المعايير والضوابط","c2"],
+const SECT=[["coop","التعاون والشراكات","سجل كل تعاون مع جهة: الموضوع والمستفيدون والأثر والشواهد","c1"],["plan","خطة الشراكة 1448هـ","أنشطة خطة الفصل الدراسي الأول وحالة تنفيذ كل نشاط وشواهده","c8"],["vision","الرؤية والرسالة","رؤية المدرسة ورسالتها وقيمها","c6"],["survey","حصر خبرات أولياء الأمور","استبانة الخبرات والمهارات والمبادرات: 43 استجابة","c5"],["charter","ميثاق الشراكة المجتمعية","الاطلاع على الميثاق وتوقيعه: 9 توقيعات","c2"],["about","التعريف بالشراكة","الرؤية والرسالة، المفهوم، القيم، الأهداف، الأهمية، المعايير والضوابط","c2"],
  ["team","قرار التكليف ولجنة الشراكة","تكليف مسؤولة الشراكة ومهامها وأعضاء اللجنة","c3"],["meet","الاجتماعات","محاضر اجتماعات لجنة الشراكة وتوصياتها","c4"],
  ["forms","النماذج","نماذج إعداد الشراكة ومتابعتها وتقييمها","c5"],["thanks","شركاء النجاح","تقدير وامتنان للجهات المتعاونة","c6"],["flyers","النشرات التوعوية","نشرات «الشراكة المدرسية.. تعاون يصنع التميز» لأولياء الأمور","c4"],["docs","التقارير والشهادات والعقود","روابط التوثيق والشواهد","c7"]];
 const TYPES=["أسرية","مجتمعية","حكومية","قطاع خاص","غير ربحي","تطوعية"];
@@ -148,7 +149,7 @@ async function showFile(u,n){const pv=$("#pv");try{const r=await fetch(u);if(!r.
 async function dlPdf(u,n,b){if(!S.dl){const x=document.createElement("a");x.href=u;x.download=n.replace(/[\\/:*?"<>|—]+/g," ").trim()+u.slice(u.lastIndexOf("."));document.body.appendChild(x);x.click();x.remove();return}b.disabled=true;try{const r=await fetch(u);if(!r.ok)throw 0;const bl=await r.blob();await S.dl.save({filename:n.replace(/[\\/:*?"<>|—]+/g," ").trim()+"."+((bl.type.split("/")[1]||"pdf").replace("jpeg","jpg")),data:bl})}catch(e){if(!e||e.code!=="declined")toast("تعذّر التنزيل")}finally{b.disabled=false}}
 function render(){const m=$("#main");
  if(S.view==="home"){m.innerHTML=vHome();return}
- const f={survey:vSurvey,vision:vVision,plan:vPlan,coop:vCoop,about:vAbout,team:vTeam,meet:vMeet,forms:vForms,thanks:vThanks,flyers:vFlyers,docs:vDocs}[S.view]||vHome;m.innerHTML=nav()+f()}
+ const f={charter:vCharter,survey:vSurvey,vision:vVision,plan:vPlan,coop:vCoop,about:vAbout,team:vTeam,meet:vMeet,forms:vForms,thanks:vThanks,flyers:vFlyers,docs:vDocs}[S.view]||vHome;m.innerHTML=nav()+f()}
 
 function vHome(){const done=S.coop.filter(c=>c.status===2).length,partners=new Set(S.coop.map(c=>c.partner).filter(Boolean)).size,ben=219;/* المستفيدون: 194 طالبة + 25 معلمة */
  const sub={plan:`${PLAN.rows.filter((r,i)=>(S.plan[i]||{}).s===2).length} من ${PLAN.rows.length} منفّذ`,coop:`${S.coop.length} تعاون مسجل`,meet:`${S.meet.length} اجتماع`,thanks:`${partners} جهة`,docs:`${S.links.length} رابط`};
@@ -252,12 +253,24 @@ const SV={pdf:"sharaka-files/28ee51cbd9395eb369438035f7b93acd.pdf",period:"26/8 
  edu:[["ابتدائي",14],["ثانوي",13],["جامعي",9],["متوسط",7]],
  skills:[["ربة منزل",9],["التعليم والتدريس",5],["القراءة والكتابة",5],["وظيفة أو تقاعد",5],["مهارات مهنية وتقنية وإدارية",4],["الطبخ والحرف والفنون",3],["مهارات متعددة",2],["لا يوجد / غير محدد",10]],
  ideas:[["الدعم التعليمي","دروس تقوية مجانية للطالبات الأقل تحصيلًا، وورش لتطوير المهارات الشخصية، وأفكار للأنشطة الصفية والمحتوى التفاعلي."],["العمل التطوعي","المشاركة في المبادرات التطوعية وتنظيم الفعاليات، ودعم الطالبات وتعزيز التعاون بين الأسرة والمدرسة."],["القيم والتوعية","المشاركة في القراءة والتوعية، وتكثيف المحاضرات الدينية، وتعزيز الانضباط والقيم الإيجابية."],["المهارات العملية والبيئة","الأشغال اليدوية والطبخ والخياطة، والتشجير، والاهتمام بالنظافة."]]};
-function svBars(rows){const t=rows.reduce((a,r)=>a+r[1],0);return rows.map(([n,v])=>`<div style="display:grid;grid-template-columns:minmax(110px,40%) 1fr auto;gap:8px;align-items:center;font-size:13.5px;margin:5px 0"><span>${esc(n)}</span><span style="height:10px;border-radius:99px;background:var(--sage-2);overflow:hidden"><i style="display:block;height:100%;width:${Math.round(100*v/t)}%;background:var(--sage);border-radius:99px"></i></span><b style="min-width:58px;text-align:left">${v} (${Math.round(100*v/t)}٪)</b></div>`).join("")}
+function svBars(rows,tot){const t=tot||rows.reduce((a,r)=>a+r[1],0);return rows.map(([n,v])=>`<div style="display:grid;grid-template-columns:minmax(110px,40%) 1fr auto;gap:8px;align-items:center;font-size:13.5px;margin:5px 0"><span>${esc(n)}</span><span style="height:10px;border-radius:99px;background:var(--sage-2);overflow:hidden"><i style="display:block;height:100%;width:${Math.round(100*v/t)}%;background:var(--sage);border-radius:99px"></i></span><b style="min-width:58px;text-align:left">${v} (${Math.round(100*v/t)}٪)</b></div>`).join("")}
 function vSurvey(){return `<section class="panel" style="background:linear-gradient(135deg,#F8EFDB,var(--card));border-color:transparent"><div class="row" style="gap:14px"><span style="color:#9A6E22">${svg("survey",40)}</span><div><h1>حصر الخبرات والمهارات لدى أولياء الأمور</h1><p class="lead">${esc(SV.period)}</p></div></div>
  <div class="row">${lnk(SV.pdf,"📄 تقرير الاستبانة كاملًا","btn pri sm")}<span class="pill good">منفّذ — ضمن خطة الشراكة</span></div></section>
  <div class="grid2">${SV.kpi.map(([n,t])=>`<div class="panel" style="text-align:center;gap:2px"><b style="font-family:var(--display);font-size:34px;color:var(--cu)">${n}</b><span class="lead">${esc(t)}</span></div>`).join("")}</div>
  <div class="grid2"><div class="panel"><h3>المستوى التعليمي</h3>${svBars(SV.edu)}</div><div class="panel"><h3>نوع الخبرة أو المهارة</h3>${svBars(SV.skills)}</div></div>
  <div class="panel"><h3>مبادرات ومقترحات أولياء الأمور</h3><div class="grid2">${SV.ideas.map(([t,d])=>`<div class="box"><b>${esc(t)}</b><p style="margin:4px 0 0;font-size:14px">${esc(d)}</p></div>`).join("")}</div></div>`}
+/* ---------- ميثاق الشراكة ---------- */
+const CH={pdf:"sharaka-files/ca00ceb8e98f7b3c315d1625bcf08149.pdf",ad:"sharaka-files/f5e6c46ca92b05bb47ee52c32b4c0c50.pdf",period:"17/9 – 5/11/2026م — عبر Microsoft Forms",
+ kpi:[["9","توقيعات على الميثاق"],["3","فئات مشاركة"],["100٪","أقررن بالاطلاع والالتزام"]],
+ cat:[["معلمة / موظفة في المدرسة",5],["ولي أمر",2],["طالبة",2]],
+ grade:[["أول متوسط",2],["ثاني متوسط",1],["ثالث متوسط",1]],
+ steps:["مسح الرمز أو الضغط عليه لفتح الاستبانة.","الاطلاع على الميثاق عبر الرابط المرفق فيها.","تأكيد الاطلاع والالتزام بما ورد فيه.","تعبئة البيانات ثم «إرسال»."],
+ rec:["تكثيف دعوة أولياء الأمور إلى توقيع الميثاق عبر الإعلان ومجموعات التواصل.","إشراك الطالبات من جميع الصفوف في التوقيع داخل الفصول.","استكمال توقيع بقية منسوبات المدرسة.","متابعة أعداد الموقّعين دوريًا وتحديث التقرير."]};
+function vCharter(){return `<section class="panel" style="background:linear-gradient(135deg,#E2F1E7,var(--card));border-color:transparent"><div class="row" style="gap:14px"><span style="color:#3C7D5B">${svg("charter",40)}</span><div><h1>ميثاق الشراكة المجتمعية 🤝</h1><p class="lead">إطلاع منسوبات المدرسة وأولياء الأمور والطالبات على الميثاق وتوثيق التزامهم به — ${esc(CH.period)}</p></div></div>
+ <div class="row">${lnk(CH.pdf,"📄 تقرير الميثاق كاملًا","btn pri sm")}${lnk(CH.ad,"📣 إعلان الدعوة للتوقيع","btn sm")}</div></section>
+ <div class="grid2">${CH.kpi.map(([n,t])=>`<div class="panel" style="text-align:center;gap:2px"><b style="font-family:var(--display);font-size:34px;color:var(--good)">${n}</b><span class="lead">${esc(t)}</span></div>`).join("")}</div>
+ <div class="grid2"><div class="panel"><h3>المشاركون حسب الفئة</h3>${svBars(CH.cat)}</div><div class="panel"><h3>المشاركون حسب الصف</h3>${svBars(CH.grade,9)}</div></div>
+ <div class="grid2"><div class="panel"><h3>خطوات التوقيع</h3><ol class="l">${CH.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol></div><div class="panel"><h3>التوصيات</h3><ul class="l">${CH.rec.map(s=>`<li>${esc(s)}</li>`).join("")}</ul></div></div>`}
 /* ---------- الرؤية والرسالة ---------- */
 const VV={img:"sharaka-files/fcb4ee9b4b90e9f60dfa5822976b181d.jpg",motto:"تعلُّمٌ يُلهم .. وقيمٌ تبني .. وطموحٌ يصنع المستقبل",
  vision:"أن نكون مدرسةً رائدةً في بناء جيلٍ متعلمٍ ومبدعٍ وواثق، يمتلك مهارات المستقبل، ويعتز بقيمه، ويسهم بفاعليةٍ في بناء مجتمعه ووطنه.",
