@@ -65,7 +65,8 @@ export async function loadContext() {
   ]);
   App.profile = p.data;
   if (!App.profile) return null;
-  App.categories = c.data || [];
+  // الخطة الأسبوعية: تُكتفى برابطها (للمسؤولين في التعبئة السريعة) — لا تظهر كقسم، وتُحسب منجزة للجميع
+  App.categories = (c.data || []).filter((x) => x.key !== WEEKLY);
   App.subjects = sub.data || [];
   App.grades = g.data || [];
   App.isAdmin = ['principal', 'chair'].includes(App.profile.role);
@@ -73,6 +74,9 @@ export async function loadContext() {
   fn('ai', { action: 'config' }).then((r) => { App.ai = r; }).catch(() => { App.ai = { ai_ready: false }; });
   return App.profile;
 }
+
+export const WEEKLY = 'weekly';
+const weeklyDone = (rows) => (rows || []).map((r) => (r.category_key === WEEKLY ? { ...r, state: 'complete' } : r));
 
 export const catOf = (key) => App.categories.find((c) => c.key === key) || { key, title: key };
 export const subjectName = (id) => App.subjects.find((s) => s.id === id)?.name || '';
@@ -127,7 +131,7 @@ export const q = {
       })),
     };
   },
-  reqStatusRaw: async () => fetchAll(() => sb.from('requirement_status').select('teacher_id, requirement_id, category_key, state')),
+  reqStatusRaw: async () => weeklyDone(await fetchAll(() => sb.from('requirement_status').select('teacher_id, requirement_id, category_key, state'))),
   progress: async () => {
     const [profs, rs, files] = await Promise.all([
       fetchAll(() => sb.from('profiles').select('id, full_name, username, active, last_login_at, last_upload_at, role, is_teacher')),
@@ -146,7 +150,7 @@ export const q = {
   reqStatus: async (teacherId) => {
     let qq = sb.from('requirement_status').select('*');
     if (teacherId) qq = qq.eq('teacher_id', teacherId);
-    return must(await qq.order('due_date', { ascending: true, nullsFirst: false }));
+    return weeklyDone(must(await qq.order('due_date', { ascending: true, nullsFirst: false })));
   },
   teachers: async () => must(await sb.from('profiles').select('*').order('full_name')),
   teacher: async (id) => must(await sb.from('profiles').select('*').eq('id', id).maybeSingle()),
