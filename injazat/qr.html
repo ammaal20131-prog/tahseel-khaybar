@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>باركود أقسام ملف الإنجازات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Readex+Pro:wght@400;600;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F6F2F8;color:#2E2335;font-family:"Readex Pro",Tahoma,sans-serif}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;max-width:1100px;margin:0 auto;padding:18px 16px}
+.bar h1{font-family:"Lalezar","Readex Pro",sans-serif;font-weight:400;font-size:1.8rem;margin:0;color:#4F4054}
+.bar button{font:inherit;font-weight:700;border:0;border-radius:999px;background:#4F4054;color:#fff;padding:10px 22px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;max-width:1100px;margin:0 auto;padding:0 16px 30px}
+.card{background:#fff;border-radius:34px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(46,35,53,.12);aspect-ratio:4/5}
+.card header{background:linear-gradient(110deg,#A88BB8,#D3BFDC);padding:18px 20px;display:flex;align-items:center;gap:14px;border-radius:0 0 34px 34px}
+.moe{height:46px;background:#fff;border-radius:12px;padding:6px 8px}
+.card header div{font-weight:700;color:#2E1F38;font-size:1.05rem;line-height:1.4}
+.card header small{display:block;color:#fff;font-weight:400;font-size:.68rem}
+.mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px 18px}
+.chip{background:var(--s);color:var(--c);font-weight:700;font-size:.85rem;border-radius:999px;padding:4px 16px}
+h2{font-family:"Lalezar","Readex Pro",sans-serif;font-weight:400;font-size:2.1rem;line-height:1.3;color:var(--c);margin:0;text-align:center}
+.qr{border:5px solid var(--c);border-radius:22px;padding:8px;background:#fff}
+.qr img{display:block;width:170px;height:170px;image-rendering:pixelated}
+.mid p{margin:0;color:#6F6378;font-size:.85rem}
+.card footer{background:#4F4054;color:#fff;text-align:center;font-size:.85rem;padding:10px}
+.card footer b{color:#E7D37C}
+@media print{
+  @page{size:A5 portrait;margin:0}
+  body{background:#fff}.bar{display:none}
+  .grid{display:block;padding:0}
+  .card{width:148mm;height:210mm;aspect-ratio:auto;border-radius:0;box-shadow:none;break-after:page;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .card header{padding:10mm 9mm}.moe{height:20mm}.card header div{font-size:7mm}.card header small{font-size:4mm}
+  .chip{font-size:5mm;padding:1.5mm 6mm}h2{font-size:15mm}.qr{border-width:2.2mm;border-radius:8mm;padding:3mm}.qr img{width:78mm;height:78mm}.mid p{font-size:5mm}.card footer{font-size:5mm;padding:5mm}
+}
+</style></head><body>
+<div class="bar"><h1>باركود أقسام ملف الإنجازات</h1><button type="button" onclick="window.print()">طباعة البطاقات</button></div>
+<main class="grid">
+<section class="card" style="--c:#B23A68;--s:#FBE7EF">
+  <header><img class="moe" src="img/moe.png" alt="شعار وزارة التعليم"><div><small>المملكة العربية السعودية · وزارة التعليم</small>متوسطة خيبر الجنوب (بنات)</div></header>
+  <div class="mid"><span class="chip">ملف الإنجازات · ٤ أعمال</span><h2>الابتكارات والاختراعات</h2><div class="qr"><img src="qr/inno.png" alt="باركود قسم الابتكارات والاختراعات"></div><p>امسحي الرمز بكاميرا الجوال</p></div>
+  <footer>تصميم: <b>أ. أمل الشهري</b> · ١٤٤٨هـ</footer>
+</section>
+<section class="card" style="--c:#4F4BB0;--s:#ECEBFA">
+  <header><img class="moe" src="img/moe.png" alt="شعار وزارة التعليم"><div><small>المملكة العربية السعودية · وزارة التعليم</small>متوسطة خيبر الجنوب (بنات)</div></header>
+  <div class="mid"><span class="chip">ملف الإنجازات · ٢٢ عملاً</span><h2>المبادرات</h2><div class="qr"><img src="qr/init.png" alt="باركود قسم المبادرات"></div><p>امسحي الرمز بكاميرا الجوال</p></div>
+  <footer>تصميم: <b>أ. أمل الشهري</b> · ١٤٤٨هـ</footer>
+</section>
+<section class="card" style="--c:#3F7F33;--s:#E8F3E4">
+  <header><img class="moe" src="img/moe.png" alt="شعار وزارة التعليم"><div><small>المملكة العربية السعودية · وزارة التعليم</small>متوسطة خيبر الجنوب (بنات)</div></header>
+  <div class="mid"><span class="chip">ملف الإنجازات · ٥ أعمال</span><h2>المشاريع التعليمية</h2><div class="qr"><img src="qr/proj.png" alt="باركود قسم المشاريع التعليمية"></div><p>امسحي الرمز بكاميرا الجوال</p></div>
+  <footer>تصميم: <b>أ. أمل الشهري</b> · ١٤٤٨هـ</footer>
+</section>
+<section class="card" style="--c:#1F7396;--s:#E2F0F6">
+  <header><img class="moe" src="img/moe.png" alt="شعار وزارة التعليم"><div><small>المملكة العربية السعودية · وزارة التعليم</small>متوسطة خيبر الجنوب (بنات)</div></header>
+  <div class="mid"><span class="chip">ملف الإنجازات · ٤ أعمال</span><h2>سجلات المدرسة الرقمية</h2><div class="qr"><img src="qr/rec.png" alt="باركود قسم سجلات المدرسة الرقمية"></div><p>امسحي الرمز بكاميرا الجوال</p></div>
+  <footer>تصميم: <b>أ. أمل الشهري</b> · ١٤٤٨هـ</footer>
+</section>
+<section class="card" style="--c:#9A5B12;--s:#FBEFDD">
+  <header><img class="moe" src="img/moe.png" alt="شعار وزارة التعليم"><div><small>المملكة العربية السعودية · وزارة التعليم</small>متوسطة خيبر الجنوب (بنات)</div></header>
+  <div class="mid"><span class="chip">ملف الإنجازات · ٦ أعمال</span><h2>ملفات إنجاز المعلمات</h2><div class="qr"><img src="qr/tch.png" alt="باركود قسم ملفات إنجاز المعلمات"></div><p>امسحي الرمز بكاميرا الجوال</p></div>
+  <footer>تصميم: <b>أ. أمل الشهري</b> · ١٤٤٨هـ</footer>
+</section>
+<section class="card" style="--c:#2F7D6D;--s:#E1F2EE">
+  <header><img class="moe" src="img/moe.png" alt="شعار وزارة التعليم"><div><small>المملكة العربية السعودية · وزارة التعليم</small>متوسطة خيبر الجنوب (بنات)</div></header>
+  <div class="mid"><span class="chip">ملف الإنجازات · ٥ أعمال</span><h2>ملفات إنجاز الطالبات</h2><div class="qr"><img src="qr/stu.png" alt="باركود قسم ملفات إنجاز الطالبات"></div><p>امسحي الرمز بكاميرا الجوال</p></div>
+  <footer>تصميم: <b>أ. أمل الشهري</b> · ١٤٤٨هـ</footer>
+</section>
+</main></body></html>
