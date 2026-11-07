@@ -1,4 +1,4 @@
-// التعبئة السريعة: كل أقسام المعلمة في صفحة واحدة — رفع مباشر للموقع، ورابط مجلدها في OneDrive، وخطتها الأسبوعية
+// التعبئة السريعة: كل أقسام المعلمة في صفحة واحدة — رفع مباشر للموقع، ورابط مجلدها في OneDrive (رابط الخطة الأسبوعية للمسؤولين فقط)
 import { App, q, catOf } from '../api.js';
 import { esc, icon, reqChip, fmtNum, progressBar, pctClass, emptyState } from '../ui.js';
 import { pageHead, catIcon, folderLink } from './_common.js';
@@ -56,15 +56,12 @@ export default async function quick(view, params, query) {
       <button class="btn" data-copy="${esc(links.partnership)}">${icon('copy')} نسخ رابط المشاركة</button></div>
     </section>` : ''}
 
-    <section class="card qf-plan">
+    ${App.isAdmin ? `<section class="card qf-plan">
       <div class="card-head"><h3>${icon('calendar-range')} الخطة التعليمية الأسبوعية</h3></div>
-      <p class="muted" style="margin:0 0 10px;font-size:.88rem">افتحي مجلد خطة مادتك، ثم مجلد الصف، وارفعي خطة الأسبوع.</p>
       <div class="qf-pl">
-        ${(links?.plans || []).map(([l, u]) => `<a class="btn primary" href="${esc(u)}" target="_blank" rel="noopener">${icon('cloud')} خطة ${esc(l)}</a>`).join('')}
-        <a class="btn" href="${esc(PLAN_LINKS.onedrive)}" target="_blank" rel="noopener">${icon('folder-open')} ملف الخطة كاملاً (ون درايف)</a>
-        <a class="btn" href="${esc(PLAN_LINKS.gdrive)}" target="_blank" rel="noopener">${icon('hard-drive')} رابط الخطة (قوقل درايف)</a>
+        <a class="btn primary" href="${esc(PLAN_LINKS.gdrive)}" target="_blank" rel="noopener">${icon('hard-drive')} رابط الخطة الأسبوعية</a>
       </div>
-    </section>
+    </section>` : ''}
     <p class="muted" style="font-size:.82rem;margin-top:12px">${icon('info')} الملفات التي ترفعينها في الون درايف تنتقل للموقع تلقائياً في المزامنة (9:52 صباحاً، 1:52 ظهراً، 8:52 مساءً)، والرفع هنا في الموقع يظهر فوراً.</p>`;
 
   view.querySelector('[data-copy]')?.addEventListener('click', async (e) => { const b = e.currentTarget; try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = 'نُسخ الرابط ✓'; } catch (_) { prompt('انسخي الرابط:', b.dataset.copy); } });
