@@ -111,7 +111,7 @@ async function teacherList(view, cat, query = {}) {
     const list = rows.filter((r) => (mode === 'subject' || !f || r.full_name.includes(f)) &&
       (!st || (st === 'missing' && r.submitted < r.req) || (st === 'review' && r.review) || (st === 'done' && r.req && r.submitted === r.req)));
     view.querySelectorAll('[data-mode]').forEach((b) => b.classList.toggle('primary', b.dataset.mode === mode));
-    grid.className = mode === 'show' ? '' : 'sub-folders';
+    grid.className = mode === 'folders' ? 'sub-folders' : '';
     if (mode === 'show' || mode === 'subject') {
       if (!urlsAt) { grid.innerHTML = '<p class="muted">جارٍ تجهيز الملفات…</p>'; loadUrls().catch(() => { urlsAt = 1; }).then(paint); return; }
       grid.innerHTML = mode === 'subject' ? subjectList(f, new Set(list.map((r) => r.teacher_id))) : showList(list); refreshIcons(); return;
