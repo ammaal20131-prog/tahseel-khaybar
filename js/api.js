@@ -65,11 +65,11 @@ export async function loadContext() {
   ]);
   App.profile = p.data;
   if (!App.profile) return null;
-  // الخطة الأسبوعية: تُكتفى برابطها (للمسؤولين في التعبئة السريعة) — لا تظهر كقسم، وتُحسب منجزة للجميع
-  App.categories = (c.data || []).filter((x) => x.key !== WEEKLY);
+  App.isAdmin = ['principal', 'chair'].includes(App.profile.role);
+  // الخطة الأسبوعية: قسمها ورابط مجلدها في قوقل درايف للمسؤولين فقط — تُلغى من حسابات المعلمات بمجلداتها، وتُحسب منجزة للجميع
+  App.categories = (c.data || []).filter((x) => App.isAdmin || x.key !== WEEKLY);
   App.subjects = sub.data || [];
   App.grades = g.data || [];
-  App.isAdmin = ['principal', 'chair'].includes(App.profile.role);
   App.isStaff = App.isAdmin || App.profile.role === 'committee';
   fn('ai', { action: 'config' }).then((r) => { App.ai = r; }).catch(() => { App.ai = { ai_ready: false }; });
   return App.profile;
@@ -150,7 +150,8 @@ export const q = {
   reqStatus: async (teacherId) => {
     let qq = sb.from('requirement_status').select('*');
     if (teacherId) qq = qq.eq('teacher_id', teacherId);
-    return weeklyDone(must(await qq.order('due_date', { ascending: true, nullsFirst: false })));
+    const rows = weeklyDone(must(await qq.order('due_date', { ascending: true, nullsFirst: false })));
+    return App.isAdmin ? rows : rows.filter((r) => r.category_key !== WEEKLY);
   },
   teachers: async () => must(await sb.from('profiles').select('*').order('full_name')),
   teacher: async (id) => must(await sb.from('profiles').select('*').eq('id', id).maybeSingle()),
