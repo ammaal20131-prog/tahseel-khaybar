@@ -59,16 +59,27 @@ async function teacherList(view, cat, query = {}) {
   const showList = (list) => list.length ? `<div class="qs-list">${list.map((r) => {
       const fs = byT[r.teacher_id] || [];
       return `<details class="qs-t" ${list.length === 1 ? 'open' : ''}><summary><span class="qs-n">${icon('user')} ${esc(r.full_name)}</span><span class="chip ${fs.length ? 'ok' : ''}">${fmtNum(fs.length)} ملف</span></summary>
-        ${fs.length ? `<div class="qs-files">${fs.map((f) => `<button class="qs-f" data-open="${f.id}">${icon(fileIcon(f.name))} <span>${esc(f.name)}</span></button>`).join('')}</div>` : '<p class="muted" style="margin:8px 0">لا توجد ملفات بعد</p>'}
+        ${fs.length ? `<div class="qs-files">${fs.map((f) => `<a class="qs-f" data-open="${f.id}" href="${esc(urls.get(f.storage_path) || '#')}" target="_blank" rel="noopener">${icon(fileIcon(f.name))} <span>${esc(f.name)}</span></a>`).join('')}</div>` : '<p class="muted" style="margin:8px 0">لا توجد ملفات بعد</p>'}
       </details>`;
     }).join('')}</div>` : emptyState('لا نتائج مطابقة', 'users');
   const fileById = new Map(files.map((f) => [f.id, f]));
+  // روابط مباشرة موقّعة لكل الملفات دفعة واحدة (صالحة ساعتين) فيُفتح الملف بضغطة دون انتظار
+  const urls = new Map();
+  let urlsAt = 0;
+  const loadUrls = async () => {
+    const paths = files.map((f) => f.storage_path).filter(Boolean);
+    for (let i = 0; i < paths.length; i += 200) {
+      const { data } = await sb.storage.from('files').createSignedUrls(paths.slice(i, i + 200), 7200);
+      (data || []).forEach((d) => { if (d.signedUrl) urls.set(d.path, d.signedUrl); });
+    }
+    urlsAt = Date.now();
+  };
   grid.addEventListener('click', async (e) => {
     const b = e.target.closest('[data-open]'); if (!b) return;
     const f = fileById.get(b.dataset.open); if (!f) return;
-    const w = window.open('', '_blank');
-    try { const url = await signedUrl(f.storage_path); if (w) w.location.href = url; else location.href = url; }
-    catch (ex) { if (w) w.close(); toast(errMsg(ex), 'bad'); }
+    if (b.getAttribute('href') !== '#' && Date.now() - urlsAt < 100 * 60e3) return; // الرابط جاهز — يفتح مباشرة
+    e.preventDefault();
+    try { location.href = await signedUrl(f.storage_path); } catch (ex) { toast(errMsg(ex), 'bad'); }
   });
   const paint = () => {
     const f = view.querySelector('[data-f]').value.trim();
@@ -77,7 +88,10 @@ async function teacherList(view, cat, query = {}) {
       (!st || (st === 'missing' && r.submitted < r.req) || (st === 'review' && r.review) || (st === 'done' && r.req && r.submitted === r.req)));
     view.querySelectorAll('[data-mode]').forEach((b) => b.classList.toggle('primary', b.dataset.mode === mode));
     grid.className = mode === 'show' ? '' : 'sub-folders';
-    if (mode === 'show') { grid.innerHTML = showList(list); refreshIcons(); return; }
+    if (mode === 'show') {
+      if (!urlsAt) { grid.innerHTML = '<p class="muted">جارٍ تجهيز الملفات…</p>'; loadUrls().catch(() => { urlsAt = 1; }).then(paint); return; }
+      grid.innerHTML = showList(list); refreshIcons(); return;
+    }
     grid.innerHTML = list.length ? list.map((r) => `<a class="sub-folder" href="${folderLink(cat.key, r.teacher_id)}" style="flex-direction:column;align-items:stretch;gap:8px">
       <div class="row" style="gap:10px;flex-wrap:nowrap">${icon('folder')}<div style="min-width:0"><div class="sn">${esc(r.full_name)}</div>
         <div class="sm">${fmtNum(r.files)} ملف${r.review ? ` · ${fmtNum(r.review)} للمراجعة` : ''}${r.last ? ' · ' + timeAgo(r.last) : ''}</div></div></div>
